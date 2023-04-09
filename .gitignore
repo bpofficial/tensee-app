@@ -13,6 +13,9 @@ web-build/
 *.app/
 *.tar.gz
 
+android/
+ios/
+
 # macOS
 .DS_Store
 
