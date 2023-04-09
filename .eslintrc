@@ -1,0 +1,22 @@
+{
+    "parser": "@typescript-eslint/parser",
+    "plugins": ["@typescript-eslint"],
+    "extends": [
+        "eslint:recommended",
+        "plugin:@typescript-eslint/eslint-recommended",
+        "plugin:@typescript-eslint/recommended",
+        "plugin:react-native/all"
+    ],
+    "rules": {
+    },
+    "env": {
+        "jest": true,
+        "react-native/react-native": true
+    },
+    "settings": {
+        "react": {
+            "version": "detect"
+        }
+    }
+}
+  

@@ -1,33 +1,46 @@
 {
-  "expo": {
-    "name": "test",
-    "slug": "test",
-    "version": "1.0.0",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "light",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      }
-    },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    },
-    "plugins": [
-      "expo-attestation-config-plugin"
-    ]
-  }
+    "expo": {
+        "name": "tensee",
+        "slug": "tensee",
+        "version": "1.0.0",
+        "orientation": "portrait",
+        "icon": "./assets/icon.png",
+        "userInterfaceStyle": "automatic",
+        "splash": {
+            "image": "./assets/splash.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#ffffff"
+        },
+        "assetBundlePatterns": ["**/*"],
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "com.tensee.app",
+            "config": {
+                "usesNonExemptEncryption": false
+            }
+        },
+        "android": {
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/adaptive-icon.png",
+                "backgroundColor": "#ffffff"
+            },
+            "package": "com.tensee.app"
+        },
+        "plugins": [
+            "expo-attestation-config-plugin",
+            "expo-apple-authentication",
+            [
+                "react-native-auth0",
+                {
+                    "domain": "bpktensee.au.auth0.com",
+                    "customScheme": "tenseeapp"
+                }
+            ]
+        ],
+        "extra": {
+            "AUTH0_DOMAIN": "bpktensee.au.auth0.com",
+            "AUTH0_CLIENT_ID": "FC4KrwsM9DKx4tO0PGO9g1VztC9OWH1D",
+            "AUTH0_AUDIENCE": "https://api.tensee.com/v1/"
+        }
+    }
 }
