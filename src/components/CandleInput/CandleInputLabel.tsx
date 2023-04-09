@@ -1,4 +1,4 @@
-import { useTheme } from "@rneui/themed";
+import { useColor } from "@hooks";
 import React from "react";
 import { StyleSheet, Text } from "react-native";
 import { useInputContext } from "./InputContext";
@@ -9,17 +9,23 @@ interface ICandleInputLabelProps {
 
 export const CandleInputLabel = ({ label }: ICandleInputLabelProps) => {
     const field = useInputContext();
-    const {
-        theme: { colors },
-    } = useTheme();
-
-    const labelColor = colors.grey6;
-    const requiredColor = colors.error;
+    const labelColor = useColor("grey6", "grey2");
+    const requiredColor = useColor("error", "error");
 
     return (
-        <Text style={[styles.label, { color: labelColor }]}>
+        <Text
+            testID="candle-input-label"
+            style={[styles.label, { color: labelColor }]}
+        >
             {label}
-            {field.required && <Text style={{ color: requiredColor }}> *</Text>}
+            {field.required && (
+                <Text
+                    testID="candle-input-label-required"
+                    style={{ color: requiredColor }}
+                >
+                    {" *"}
+                </Text>
+            )}
         </Text>
     );
 };

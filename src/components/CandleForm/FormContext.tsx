@@ -5,8 +5,11 @@ import { ICandleInputProps } from "../CandleInput";
 /**
  * The context state for the CandleForm.
  */
-interface ICandleFormContextState<T extends Yup.ObjectSchema<Yup.AnyObject>> {
+export interface ICandleFormContextState<
+    T extends Yup.ObjectSchema<Yup.AnyObject>
+> {
     schema: T;
+    formError?: string;
     isValid: boolean;
     getFieldProps(field: string): Partial<ICandleInputProps>;
     handleSubmit(): void;

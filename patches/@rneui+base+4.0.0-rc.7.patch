@@ -1,0 +1,28 @@
+diff --git a/node_modules/@rneui/base/dist/Input/Input.js b/node_modules/@rneui/base/dist/Input/Input.js
+index 2e6bea1..ee3b3ca 100644
+--- a/node_modules/@rneui/base/dist/Input/Input.js
++++ b/node_modules/@rneui/base/dist/Input/Input.js
+@@ -10,10 +10,9 @@ var __rest = (this && this.__rest) || function (s, e) {
+     return t;
+ };
+ import React from 'react';
+-import { Text, View, TextInput, Animated, Easing, Platform, StyleSheet, } from 'react-native';
+-import { renderNode, patchWebProps, defaultTheme } from '../helpers';
+-import { fonts } from '../helpers';
++import { Animated, Easing, Platform, StyleSheet, Text, TextInput, View, } from 'react-native';
+ import { Icon } from '../Icon';
++import { defaultTheme, fonts, patchWebProps, renderNode } from '../helpers';
+ const renderText = (content, defaultProps, style) => renderNode(Text, content, Object.assign(Object.assign({}, defaultProps), { style: StyleSheet.flatten([style, defaultProps && defaultProps.style]) }));
+ export class Input extends React.Component {
+     constructor() {
+@@ -69,7 +68,9 @@ export class Input extends React.Component {
+                     },
+                     inputContainerStyle,
+                     { transform: [{ translateX }] },
+-                ]) },
++                ]),
++                testID: "RNE__Input__text-container"
++                },
+                 leftIcon && (React.createElement(View, { style: StyleSheet.flatten([
+                         styles.iconContainer,
+                         leftIconContainerStyle,

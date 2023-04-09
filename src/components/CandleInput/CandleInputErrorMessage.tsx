@@ -16,7 +16,10 @@ export const CandleInputErrorMessage = () => {
     if (!isError) return null;
 
     return (
-        <Text style={[styles.errorText, { color: colors.error }]}>
+        <Text
+            testID="candle-input-error-message"
+            style={[styles.errorText, { color: colors.error }]}
+        >
             {errorText}
         </Text>
     );

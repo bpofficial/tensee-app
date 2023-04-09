@@ -1,4 +1,4 @@
 export * from "./EmailField";
-export * from "./FullNameField";
+export * from "./LegalNameField";
 export * from "./PasswordConfirmationField";
 export * from "./PasswordField";

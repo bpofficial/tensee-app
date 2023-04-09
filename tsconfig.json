@@ -14,7 +14,10 @@
       "@api": ["./src/api"],
       "@api/*": ["./src/api/*"],
       "@utils": ["./src/utils"],
-      "@utils/*": ["./src/utils/*"]
+      "@utils/*": ["./src/utils/*"],
+      "@screens": ["./src/screens"],
+      "@screens/*": ["./src/screens/*"],
+      "@navigation": ["./src/navigation"],
     }
   }
 }

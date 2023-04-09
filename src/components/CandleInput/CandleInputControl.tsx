@@ -15,7 +15,9 @@ export const CandleInputControl = ({
 }: PropsWithChildren<ICandleInputControl>) => {
     return (
         <CandleInputContextProvider {...{ name, required }}>
-            <View style={styles.container}>{children}</View>
+            <View style={styles.container} testID="candle-input-control">
+                {children}
+            </View>
         </CandleInputContextProvider>
     );
 };

@@ -28,7 +28,7 @@ export const CandleInputRightIcon = ({ children }: PropsWithChildren) => {
         : "";
 
     return (
-        <View style={styles.inputIcon}>
+        <View testID="candle-input-right-icon" style={styles.inputIcon}>
             {isError || isSuccess ? (
                 <Ionicons name={iconName as any} size={24} color={iconColor} />
             ) : undefined}

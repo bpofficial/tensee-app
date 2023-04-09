@@ -7,10 +7,10 @@ import {
     ICandleInputProps,
 } from "@components";
 
-export const FullNameField: React.FC<ICandleInputProps> = (props) => {
+export const LegalNameField: React.FC<ICandleInputProps> = (props) => {
     return (
         <CandleInputControl name="name" required>
-            <CandleInputLabel label="Full Name" />
+            <CandleInputLabel label="Legal Name" />
             <CandleInput
                 placeholder="John Doe"
                 keyboardType="default"

@@ -7,7 +7,7 @@ import {
     useRef,
     useState,
 } from "react";
-import { TextInput } from "react-native";
+import { Keyboard, TextInput } from "react-native";
 import * as Yup from "yup";
 import { ICandleInputProps } from "../CandleInput";
 import { CandleFormContext } from "./FormContext";
@@ -22,9 +22,7 @@ export interface ICandleFormActions {
 /**
  * Props for the CandleForm component.
  */
-interface ICandleInputContextProviderProps<
-    T extends Yup.ObjectSchema<Yup.AnyObject>
-> {
+export interface ICandleFormProps<T extends Yup.ObjectSchema<Yup.AnyObject>> {
     schema: T;
     onSubmit(
         values: Required<SchemaValues<SchemaKeys<T>, string>>,
@@ -39,7 +37,7 @@ export const CandleForm = <T extends Yup.ObjectSchema<Yup.AnyObject>>({
     schema,
     onSubmit,
     children,
-}: PropsWithChildren<ICandleInputContextProviderProps<T>>) => {
+}: PropsWithChildren<ICandleFormProps<T>>) => {
     const fieldKeys = useMemo(() => Object.keys(schema.fields), []);
     const inputRefs = fieldKeys.map(() => useRef<TextInput | null>(null));
 
@@ -50,7 +48,7 @@ export const CandleForm = <T extends Yup.ObjectSchema<Yup.AnyObject>>({
         SchemaValues<SchemaKeys<T>, boolean>
     >({});
 
-    const [formError, setFormError] = useState<string | null>(null);
+    const [formError, setFormError] = useState<string | undefined>();
 
     /**
      * Handles changes to a field.
@@ -69,7 +67,7 @@ export const CandleForm = <T extends Yup.ObjectSchema<Yup.AnyObject>>({
     };
 
     const handleFormReset = () => {
-        setFormError(null);
+        setFormError(undefined);
         setValues({});
         setErrors({});
         setTouched({});
@@ -84,7 +82,7 @@ export const CandleForm = <T extends Yup.ObjectSchema<Yup.AnyObject>>({
             onSubmit(values as any, {
                 resetForm: handleFormReset,
                 setFormError,
-                clearFormError: () => setFormError(null),
+                clearFormError: () => setFormError(undefined),
             });
     }, [isValid]);
 
@@ -123,13 +121,21 @@ export const CandleForm = <T extends Yup.ObjectSchema<Yup.AnyObject>>({
         [inputRefs, fieldKeys]
     );
 
+    const handleOnNext = (field: string) => {
+        const [currentRef, nextRef] = getRef(field);
+        if (currentRef && nextRef === null) {
+            Keyboard.dismiss();
+            handleSubmit();
+        } else if (nextRef) {
+            nextRef.current?.focus?.();
+        }
+    };
+
     /**
      * Gets field-specific props for a given field.
      */
     const getFieldProps = useCallback(
         (field: string): Partial<ICandleInputProps> => {
-            const [currentRef, nextRef] = getRef(field);
-
             return {
                 onBlur: handleBlur(field),
                 onChangeText: handleChange(field),
@@ -137,13 +143,9 @@ export const CandleForm = <T extends Yup.ObjectSchema<Yup.AnyObject>>({
                 isError: !!touched[field] && errors[field],
                 isSuccess: !!touched[field] && !errors[field],
                 value: values[field],
-                ref: currentRef,
+                ref: getRef(field)[0],
                 onSubmitEditing() {
-                    if (!!currentRef && nextRef === null) {
-                        handleSubmit();
-                    } else if (nextRef) {
-                        nextRef?.current?.focus?.();
-                    }
+                    handleOnNext(field);
                 },
                 blurOnSubmit: false,
             };
@@ -160,7 +162,7 @@ export const CandleForm = <T extends Yup.ObjectSchema<Yup.AnyObject>>({
 
     return (
         <CandleFormContext.Provider
-            value={{ schema, isValid, getFieldProps, handleSubmit }}
+            value={{ formError, schema, isValid, getFieldProps, handleSubmit }}
         >
             {children}
         </CandleFormContext.Provider>

@@ -15,6 +15,7 @@ web-build/
 
 android/
 ios/
+coverage/
 
 # macOS
 .DS_Store

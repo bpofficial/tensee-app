@@ -9,32 +9,26 @@ import { SignupError, UnknownError } from "@errors";
 import { useAuth, useBoolean } from "@hooks";
 import React from "react";
 import { View } from "react-native";
-import {
-    EmailField,
-    LegalNameField,
-    PasswordConfirmationField,
-    PasswordField,
-} from "../CommonInputFields";
-import { RegisterFormValidationSchema } from "./validationSchema";
+import { EmailField, PasswordField } from "../CommonInputFields";
+import { LoginFormValidationSchema } from "./validationSchema";
 
 interface FormValues {
-    name: string;
     email: string;
     password: string;
 }
 
-export const RegisterForm = () => {
-    const { register } = useAuth();
+export const LoginForm = () => {
+    const { login } = useAuth();
     const [isLoading, loading] = useBoolean();
 
-    const handleRegistration = async (
+    const handleLogin = async (
         values: FormValues,
         actions: ICandleFormActions
     ) => {
         await withNetworkActivity(async () => {
             loading.on();
             try {
-                await register(values.name, values.email, values.password);
+                await login(values.email, values.password);
                 actions.resetForm();
             } catch (error: any) {
                 actions.setFormError(
@@ -54,18 +48,16 @@ export const RegisterForm = () => {
     return (
         <View>
             <CandleForm
-                onSubmit={handleRegistration}
-                schema={RegisterFormValidationSchema}
+                onSubmit={handleLogin}
+                schema={LoginFormValidationSchema}
             >
-                <LegalNameField />
                 <EmailField />
                 <PasswordField />
-                <PasswordConfirmationField />
                 <CandleFormConsumer>
                     {({ isValid, handleSubmit }) => (
                         <CandleButton
                             disabled={!isValid}
-                            title="Continue"
+                            title="Log in"
                             variant="primary"
                             loading={isLoading}
                             onPress={handleSubmit}

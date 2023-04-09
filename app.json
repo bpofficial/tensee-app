@@ -1,46 +1,53 @@
 {
-    "expo": {
-        "name": "tensee",
-        "slug": "tensee",
-        "version": "1.0.0",
-        "orientation": "portrait",
-        "icon": "./assets/icon.png",
-        "userInterfaceStyle": "automatic",
-        "splash": {
-            "image": "./assets/splash.png",
-            "resizeMode": "contain",
-            "backgroundColor": "#ffffff"
-        },
-        "assetBundlePatterns": ["**/*"],
-        "ios": {
-            "supportsTablet": true,
-            "bundleIdentifier": "com.tensee.app",
-            "config": {
-                "usesNonExemptEncryption": false
-            }
-        },
-        "android": {
-            "adaptiveIcon": {
-                "foregroundImage": "./assets/adaptive-icon.png",
-                "backgroundColor": "#ffffff"
-            },
-            "package": "com.tensee.app"
-        },
-        "plugins": [
-            "expo-attestation-config-plugin",
-            "expo-apple-authentication",
-            [
-                "react-native-auth0",
-                {
-                    "domain": "bpktensee.au.auth0.com",
-                    "customScheme": "tenseeapp"
-                }
-            ]
-        ],
-        "extra": {
-            "AUTH0_DOMAIN": "bpktensee.au.auth0.com",
-            "AUTH0_CLIENT_ID": "FC4KrwsM9DKx4tO0PGO9g1VztC9OWH1D",
-            "AUTH0_AUDIENCE": "https://api.tensee.com/v1/"
+  "expo": {
+    "name": "Tensee",
+    "slug": "tensee",
+    "version": "1.0.0",
+    "scheme": "tenseeapp",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "automatic",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#161414"
+    },
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.tensee.app",
+      "config": {
+        "usesNonExemptEncryption": false
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#161414"
+      },
+      "package": "com.tensee.app"
+    },
+    "plugins": [
+      "expo-attestation-config-plugin",
+      "expo-apple-authentication",
+      [
+        "react-native-auth0",
+        {
+          "domain": "bpktensee.au.auth0.com",
+          "customScheme": "tenseeapp"
         }
+      ],
+      "sentry-expo"
+    ],
+    "extra": {
+      "AUTH0_DOMAIN": "bpktensee.au.auth0.com",
+      "AUTH0_CLIENT_ID": "FC4KrwsM9DKx4tO0PGO9g1VztC9OWH1D",
+      "AUTH0_AUDIENCE": "https://api.tensee.com/v1/",
+      "eas": {
+        "projectId": "66b344d5-8fad-45d1-8338-c9d3db4067c1"
+      }
     }
+  }
 }

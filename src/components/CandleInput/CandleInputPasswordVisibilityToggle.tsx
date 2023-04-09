@@ -1,5 +1,6 @@
 import { MaterialIcons } from "@expo/vector-icons";
-import { TouchableOpacity } from "react-native";
+import { useTheme } from "@rneui/themed";
+import { TouchableOpacity, useColorScheme } from "react-native";
 
 interface ICandleInputPasswordVisibilityToggleProps {
     toggleVisibility: () => void;
@@ -10,12 +11,20 @@ export const CandleInputPasswordVisibilityToggle = ({
     toggleVisibility,
     isVisible,
 }: ICandleInputPasswordVisibilityToggleProps) => {
+    const { theme } = useTheme();
+    const colorMode = useColorScheme();
+    const color =
+        colorMode === "dark" ? theme.colors.grey2 : theme.colors.black;
+
     return (
-        <TouchableOpacity onPress={toggleVisibility}>
+        <TouchableOpacity
+            testID="candle-input-visibility-toggle"
+            onPress={toggleVisibility}
+        >
             <MaterialIcons
                 name={isVisible ? "visibility-off" : "visibility"}
                 size={24}
-                color="black"
+                color={color}
             />
         </TouchableOpacity>
     );

@@ -10,7 +10,7 @@ const CandleInputContext = createContext<ICandleInputContextState>({
     required: false,
 });
 
-interface ICandleInputContextProviderProps {
+export interface ICandleInputContextProviderProps {
     required?: boolean;
     name: string;
 }
