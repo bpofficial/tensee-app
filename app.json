@@ -39,7 +39,8 @@
           "customScheme": "tenseeapp"
         }
       ],
-      "sentry-expo"
+      "sentry-expo",
+      "expo-localization"
     ],
     "extra": {
       "AUTH0_DOMAIN": "bpktensee.au.auth0.com",
