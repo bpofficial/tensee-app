@@ -65,7 +65,7 @@ export const CandleTheme: Partial<CreateThemeOptions> = {
         focusOutline: "#E0E0E0",
 
         success: "green",
-        error: "#B00020",
+        // error: "#B00020",
 
         white: "white",
         black: "black",

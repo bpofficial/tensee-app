@@ -1,11 +1,14 @@
 import { withNetworkActivity } from "@api/withNetworkActivity";
+import { Logger } from "@common";
 import {
     CandleButton,
     CandleForm,
     CandleFormConsumer,
+    CandleFormErrors,
+    CandleInputDoneAccessory,
     ICandleFormActions,
 } from "@components";
-import { SignupError, UnknownError } from "@errors";
+import { LoginError, UnknownError } from "@errors";
 import { useAuth, useBoolean } from "@hooks";
 import React from "react";
 import { View } from "react-native";
@@ -17,7 +20,13 @@ interface FormValues {
     password: string;
 }
 
-export const LoginForm = () => {
+interface FormProps {
+    autoFocus?: boolean;
+}
+
+export const LoginForm: React.FC<FormProps> = ({ autoFocus }) => {
+    const doneAccessoryID = "login-form-accessory";
+
     const { login } = useAuth();
     const [isLoading, loading] = useBoolean();
 
@@ -29,16 +38,16 @@ export const LoginForm = () => {
             loading.on();
             try {
                 await login(values.email, values.password);
-                actions.resetForm();
             } catch (error: any) {
+                Logger.captureException(error);
                 actions.setFormError(
                     error?.message ?? "An unknown error occured"
                 );
 
-                if (error instanceof SignupError) {
+                if (error instanceof LoginError) {
                     console.log(error.message);
                 } else if (error instanceof UnknownError) {
-                    console.log("unknown error");
+                    console.log("unknown error", error);
                 }
             }
             loading.off();
@@ -51,8 +60,15 @@ export const LoginForm = () => {
                 onSubmit={handleLogin}
                 schema={LoginFormValidationSchema}
             >
-                <EmailField />
-                <PasswordField />
+                <CandleFormErrors />
+                <EmailField
+                    {...{ autoFocus }}
+                    inputAccessoryViewID={doneAccessoryID}
+                />
+                <PasswordField
+                    returnKeyType="done"
+                    inputAccessoryViewID={doneAccessoryID}
+                />
                 <CandleFormConsumer>
                     {({ isValid, handleSubmit }) => (
                         <CandleButton
@@ -65,6 +81,7 @@ export const LoginForm = () => {
                     )}
                 </CandleFormConsumer>
             </CandleForm>
+            <CandleInputDoneAccessory id={doneAccessoryID} />
         </View>
     );
 };

@@ -1,6 +1,6 @@
 import { createExtendedTheme } from "@common";
 import { AuthProvider } from "@hooks";
-import { Navigation, routingInstrumentation } from "@navigation";
+import { Navigation } from "@navigation";
 import {
     ThemeProvider,
     createTheme,
@@ -12,19 +12,6 @@ import { useEffect, useMemo } from "react";
 import { StyleSheet, useColorScheme } from "react-native";
 import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import * as Sentry from "sentry-expo";
-
-Sentry.init({
-    dsn: "https://b74bc21c7e414440909917b6f6d5cc97@o4504537071681536.ingest.sentry.io/4504984304615424",
-    enableInExpoDevelopment: true,
-    debug: true,
-    sampleRate: 1.0,
-    integrations: [
-        new Sentry.Native.ReactNativeTracing({
-            // Pass instrumentation to be used as `routingInstrumentation`
-            routingInstrumentation,
-        }),
-    ],
-});
 
 function App() {
     const { theme } = useTheme();

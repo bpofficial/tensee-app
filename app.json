@@ -40,7 +40,8 @@
         }
       ],
       "sentry-expo",
-      "expo-localization"
+      "expo-localization",
+      "expo-facebook"
     ],
     "extra": {
       "AUTH0_DOMAIN": "bpktensee.au.auth0.com",

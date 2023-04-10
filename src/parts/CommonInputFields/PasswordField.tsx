@@ -3,14 +3,13 @@ import {
     CandleInputControl,
     CandleInputErrorMessage,
     CandleInputHelperText,
-    CandleInputLabel,
     ICandleInputProps,
 } from "@components";
 
 export const PasswordField: React.FC<ICandleInputProps> = (props) => {
     return (
         <CandleInputControl name="password" required>
-            <CandleInputLabel label="Password" />
+            {/* <CandleInputLabel label="Password" /> */}
             <CandleInput
                 secureTextEntry
                 placeholder="Password"

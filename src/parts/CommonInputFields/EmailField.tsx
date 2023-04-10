@@ -3,14 +3,13 @@ import {
     CandleInputControl,
     CandleInputErrorMessage,
     CandleInputHelperText,
-    CandleInputLabel,
     ICandleInputProps,
 } from "@components";
 
 export const EmailField: React.FC<ICandleInputProps> = (props) => {
     return (
         <CandleInputControl name="email" required>
-            <CandleInputLabel label="Email Address" />
+            {/* <CandleInputLabel label="Email Address" /> */}
             <CandleInput
                 placeholder="Email"
                 keyboardType="email-address"

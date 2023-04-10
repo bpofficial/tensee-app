@@ -1266,7 +1266,7 @@
     xcode "^3.0.1"
     xml2js "0.4.23"
 
-"@expo/config-plugins@^4.1.5":
+"@expo/config-plugins@^4.0.14", "@expo/config-plugins@^4.0.2", "@expo/config-plugins@^4.1.5":
   version "4.1.5"
   resolved "https://registry.yarnpkg.com/@expo/config-plugins/-/config-plugins-4.1.5.tgz#9d357d2cda9c095e511b51583ede8a3b76174068"
   integrity sha512-RVvU40RtZt12HavuDAe+LDIq9lHj7sheOfMEHdmpJ/uTA8pgvkbc56XF6JHQD+yRr6+uhhb+JnAasGq49dsQbw==
@@ -4455,6 +4455,14 @@ expect@^29.0.0, expect@^29.5.0:
     jest-message-util "^29.5.0"
     jest-util "^29.5.0"
 
+expo-app-auth@~11.1.0:
+  version "11.1.1"
+  resolved "https://registry.yarnpkg.com/expo-app-auth/-/expo-app-auth-11.1.1.tgz#14331bfc26f754560f08c5e4100b2a958b4ea55e"
+  integrity sha512-BYsVJ54GySnpVjRLmUX//XkDkqlqigpOS+MWBARURecPu038Ei2tsIsboLqbaa6oyoWhtU9OfYacVHczE/BFmQ==
+  dependencies:
+    "@expo/config-plugins" "^4.0.2"
+    invariant "^2.2.4"
+
 expo-apple-authentication@~6.0.1:
   version "6.0.1"
   resolved "https://registry.yarnpkg.com/expo-apple-authentication/-/expo-apple-authentication-6.0.1.tgz#bd86c5bc8e00da71f7af1aa1f6b02a833a80a9f8"
@@ -4483,10 +4491,10 @@ expo-attestation-config-plugin@1.0.1:
   resolved "https://registry.yarnpkg.com/expo-attestation-config-plugin/-/expo-attestation-config-plugin-1.0.1.tgz#470eec2bb18b88e7f76d43e7e1f90d2d7b1c25dc"
   integrity sha512-/79q2RL1laB4eR8xX56l7Cd272DCvYhtdUTZc1Ic8/SGsa1Svo1o2sNkARqdGdh+0aujXv+//QZd650pJssUTg==
 
-expo-attestation@1.1.8:
-  version "1.1.8"
-  resolved "https://registry.yarnpkg.com/expo-attestation/-/expo-attestation-1.1.8.tgz#5994b7ef64ea6f386dc588846f39fb34721adb61"
-  integrity sha512-PvvYHK6XVbThRoAhkqXoQHY4sBQ6u1NYr2NAupnfeTtFgWU1GJJjvT8wnfmx/fKBnJlHPjDRhFEZ8BwUNrPIwA==
+expo-attestation@1.2.1:
+  version "1.2.1"
+  resolved "https://registry.yarnpkg.com/expo-attestation/-/expo-attestation-1.2.1.tgz#9ca88a896449c680b025f4becacf3ee6eb77bdb6"
+  integrity sha512-fHLjf2fbQfbNUn005as/spSIFWOBfdOFk7+2ASS0MmV/NJHgXETyDKJ3UIlfffawHLsmo9NedggfnqATBRAm8A==
 
 expo-auth-session@~4.0.3:
   version "4.0.3"
@@ -4579,6 +4587,13 @@ expo-eas-client@~0.5.0:
   resolved "https://registry.yarnpkg.com/expo-eas-client/-/expo-eas-client-0.5.1.tgz#3ef80dbbde13abe35be4e2a2e29b73d2f7fdf27a"
   integrity sha512-i3L/iwhI6cFhSUpVsCxSU5qehNznL/rQFYoof6qUIh3CMyijCuTEwjEhwbw2a5W6obPBzQUXbomMSFDO6D5/0Q==
 
+expo-facebook@^12.2.0:
+  version "12.2.0"
+  resolved "https://registry.yarnpkg.com/expo-facebook/-/expo-facebook-12.2.0.tgz#7d552d18620c5070e3061747ab8e8940953d85a5"
+  integrity sha512-goW+s2tyzAxo2EX6Qp0vML8fjb25TE8ZzpmjGdwh3FvapIBzcY3AKpiAyjH/1sGMvadtbgfy2ApiMKNIom6aTA==
+  dependencies:
+    "@expo/config-plugins" "^4.0.14"
+
 expo-file-system@~15.2.0, expo-file-system@~15.2.2:
   version "15.2.2"
   resolved "https://registry.npmjs.org/expo-file-system/-/expo-file-system-15.2.2.tgz"
@@ -4592,6 +4607,13 @@ expo-font@~11.1.1:
   integrity sha512-X+aICqYY69hiiDDtcNrjq8KutHrH2TrHuMqk0Rfq0P7hF6hMd+YefwLBNkvIrqrgmTAuqiLjMUwj2rHLqmgluw==
   dependencies:
     fontfaceobserver "^2.1.0"
+
+expo-google-app-auth@~8.3.0:
+  version "8.3.0"
+  resolved "https://registry.yarnpkg.com/expo-google-app-auth/-/expo-google-app-auth-8.3.0.tgz#076c2e44aa56eda73fd09c422bc11da1614dbd4f"
+  integrity sha512-JZd2N2W4mpqdoH0R68zrqmZvKKF8D/5i7lF4tmkWNdmWpGs5JgEfdKLYC5x93Yze7vwsrHKwEmyA6R74cR0e2A==
+  dependencies:
+    expo-app-auth "~11.1.0"
 
 expo-haptics@~12.2.1:
   version "12.2.1"
@@ -8241,6 +8263,11 @@ react-native-gradle-plugin@^0.71.17:
   version "0.71.17"
   resolved "https://registry.npmjs.org/react-native-gradle-plugin/-/react-native-gradle-plugin-0.71.17.tgz"
   integrity sha512-OXXYgpISEqERwjSlaCiaQY6cTY5CH6j73gdkWpK0hedxtiWMWgH+i5TOi4hIGYitm9kQBeyDu+wim9fA8ROFJA==
+
+react-native-keyboard-toolbar@^0.0.8:
+  version "0.0.8"
+  resolved "https://registry.yarnpkg.com/react-native-keyboard-toolbar/-/react-native-keyboard-toolbar-0.0.8.tgz#82cfdc3892aa2c586bdbcd2d323b714dd0878342"
+  integrity sha512-G20cyvH4kYBshe61dy1hlZ8DyKWxervbuAjSYb4EKQx/pwlYooITNh4LeH03V3i8iK44hP9cDE1oJJ7rVFhIKg==
 
 react-native-ratings@^8.1.0:
   version "8.1.0"

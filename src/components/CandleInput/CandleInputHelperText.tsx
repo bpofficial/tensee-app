@@ -17,7 +17,7 @@ export const CandleInputHelperText = ({
     const { isError, errorText } = form.getFieldProps(field.name);
     const helperTextColor = useColor("grey4", "grey3");
 
-    if (isError && errorText) return null;
+    if ((isError && errorText) || !helperText) return null;
 
     return (
         <Text

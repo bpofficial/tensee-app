@@ -34,6 +34,7 @@ export const CandleInput: React.FC<ICandleInputProps> = (inputProps) => {
     const [isPasswordVisible, setIsPasswordVisible] = useState(false);
 
     const textColor = useColor("black", "grey1");
+    const backgroundColor = useColor("white", "grey9");
     const focusBorderColor = props.isError
         ? colors.error
         : props.isSuccess
@@ -71,6 +72,7 @@ export const CandleInput: React.FC<ICandleInputProps> = (inputProps) => {
             inputContainerStyle={[
                 styles.inputContainer,
                 { borderColor: focusBorderColor },
+                { backgroundColor },
             ]}
             rightIcon={
                 <CandleInputRightIcon>

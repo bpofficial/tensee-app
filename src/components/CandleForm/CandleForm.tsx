@@ -7,7 +7,7 @@ import {
     useRef,
     useState,
 } from "react";
-import { Keyboard, TextInput } from "react-native";
+import { TextInput } from "react-native";
 import * as Yup from "yup";
 import { ICandleInputProps } from "../CandleInput";
 import { CandleFormContext } from "./FormContext";
@@ -124,7 +124,6 @@ export const CandleForm = <T extends Yup.ObjectSchema<Yup.AnyObject>>({
     const handleOnNext = (field: string) => {
         const [currentRef, nextRef] = getRef(field);
         if (currentRef && nextRef === null) {
-            Keyboard.dismiss();
             handleSubmit();
         } else if (nextRef) {
             nextRef.current?.focus?.();

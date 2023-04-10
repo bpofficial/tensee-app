@@ -12,20 +12,16 @@ export const linking: LinkingOptions<RootStackParamList> = {
     prefixes: [Linking.createURL("/")],
     config: {
         screens: {
-            Root: {
+            Auth: {
                 screens: {
-                    Home: {
-                        screens: {
-                            TabOneScreen: "one",
-                        },
-                    },
-                    Auth: {
-                        screens: {
-                            TabTwoScreen: "two",
-                        },
-                    },
+                    SocialCallback: "auth/callback",
+                    Login: "auth/login",
+                    Register: "auth/register",
+                    ForgotPassword: "auth/forgotpassword",
+                    ForgotPasswordReset: "auth/resetpassword",
                 },
             },
+            NotFound: "*",
         },
     },
 };

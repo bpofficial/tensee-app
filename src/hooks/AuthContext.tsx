@@ -2,7 +2,7 @@ import { api } from "@api/constants";
 import { createAppState } from "@api/createAppState";
 import { refreshAccessToken } from "@api/refreshAccessToken";
 import { withNetworkActivity } from "@api/withNetworkActivity";
-import { Config } from "@common";
+import { Config, Logger } from "@common";
 import { UnknownError, getDefinedError } from "@errors";
 import { setSecureItem } from "@utils";
 import React, {
@@ -20,6 +20,7 @@ interface IAuthContext {
     login(email: string, password: string): Promise<void>;
     register(name: string, email: string, password: string): Promise<void>;
     refreshToken(): Promise<void>;
+    clear(): Promise<void>;
 }
 
 const AuthContext = createContext<IAuthContext>({
@@ -31,6 +32,9 @@ const AuthContext = createContext<IAuthContext>({
         // empty
     },
     refreshToken: async () => {
+        // empty
+    },
+    clear: async () => {
         // empty
     },
 });
@@ -103,7 +107,8 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
                 }
             });
         } catch (error) {
-            console.error("Authentication error:", error);
+            getDefinedError("auth0", error);
+            throw new UnknownError();
         }
     };
 
@@ -126,10 +131,22 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
                 });
             });
         } catch (error) {
-            if (error && typeof error === "object" && "code" in error) {
-                getDefinedError("auth0", String(error.code));
-            }
+            getDefinedError("auth0", error);
             throw new UnknownError();
+        }
+    };
+
+    const clearStoredCredentials = async () => {
+        try {
+            await Promise.all([
+                setSecureItem(api.secureStorageKey + "_accessToken", ""),
+                setSecureItem(api.secureStorageKey + "_refreshToken", ""),
+                setSecureItem(api.secureStorageKey + "_atExpiresAt", ""),
+                setSecureItem(api.secureStorageKey + "_rtExpiresAt", ""),
+            ]);
+        } catch (err) {
+            Logger.captureException(err);
+            console.error(err);
         }
     };
 
@@ -146,6 +163,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
                 login,
                 register,
                 refreshToken: refreshAccessToken,
+                clear: clearStoredCredentials,
             }}
         >
             {children}

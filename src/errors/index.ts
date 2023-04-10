@@ -1,4 +1,5 @@
 import { ClientError } from "./ClientError";
+import { LoginError } from "./LoginError";
 import { ServerError } from "./ServerError";
 import { SignupError } from "./SignupError";
 import { UnknownError } from "./UnknownError";
@@ -27,13 +28,15 @@ export const ErrorMappings = {
         ),
         password_strength_error: new SignupError("The password is too weak."),
 
+        invalid_grant: new LoginError(),
+        too_many_attempts: new LoginError(
+            "Your account has been blocked after multiple consecutive login attempts."
+        ),
+
         invalid_scope: new ClientError(
             "The requested scope is invalid, unknown, or malformed."
         ),
         invalid_client: new ClientError("The client authentication failed."),
-        invalid_grant: new ClientError(
-            "The provided grant is invalid or has expired."
-        ),
         unauthorized_client: new ClientError(
             "The client is not authorized to perform the requested action."
         ),
@@ -57,20 +60,41 @@ export const ErrorMappings = {
 
 export function getDefinedError(
     subject: keyof typeof ErrorMappings,
-    code?: string
+    error?: unknown
 ) {
+    let code: string | undefined;
+
+    // Disassemble Auth0 Errors here...
+    if (error && typeof error === "object") {
+        if ("code" in error) {
+            code = String(error.code);
+        } else if ("json" in error) {
+            const json = error.json as Record<string, string>;
+            if ("error" in json) {
+                code = json.error;
+            }
+        }
+    }
+
+    // Add more error dissasemblies here...
+
     if (!code) return;
+
     const errors = ErrorMappings[subject];
     if (code in errors) {
-        throw ErrorMappings[subject][code as keyof typeof errors];
+        const newError = ErrorMappings[subject][code as keyof typeof errors];
+        if (!newError.message && error instanceof Error) {
+            newError.message = error.message;
+        }
+        throw newError;
     }
 }
 
 // export * from "./AccessTokenExpiredError";
-export * from "./ClientError";
-// export * from "./NetworkError";
-export * from "./RefreshAccessTokenFailedError";
 // export * from "./RefreshTokenExpiredError";
+export * from "./ClientError";
+export * from "./LoginError";
+export * from "./RefreshAccessTokenFailedError";
 export * from "./ServerError";
 export * from "./SignupError";
 export * from "./UnknownError";
