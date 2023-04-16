@@ -1,11 +1,17 @@
 import { CandleDivider } from "@components";
 import {
+    ActivityConsumer,
+    ActivityProvider,
+    useAttemptBiometricLogin,
+} from "@hooks";
+import {
     LoginForm,
     SignInWithApple,
     SignInWithFacebook,
     SignInWithGoogle,
 } from "@parts";
-import React from "react";
+import { useIsFocused } from "@react-navigation/native";
+import React, { useEffect } from "react";
 import {
     Image,
     KeyboardAvoidingView,
@@ -14,28 +20,42 @@ import {
     View,
 } from "react-native";
 
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const TenseeLogo = require("../../../../assets/icon-transparent.png");
+
 export const LoginScreen = () => {
+    const isFocused = useIsFocused();
+    const attemptBiometricLogin = useAttemptBiometricLogin();
+
+    useEffect(() => {
+        if (isFocused) attemptBiometricLogin();
+    }, [isFocused]);
+
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-            keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -500}
-        >
-            <View style={styles.centeredContainer}>
-                <View style={styles.logo}>
-                    <Image
-                        source={require("../../../../assets/icon-transparent.png")}
-                    />
-                </View>
-                <LoginForm />
-                <CandleDivider label="or" />
-                <View style={styles.socialButtons}>
-                    <SignInWithApple />
-                    <SignInWithGoogle />
-                    <SignInWithFacebook />
-                </View>
-            </View>
-        </KeyboardAvoidingView>
+        <ActivityProvider>
+            <KeyboardAvoidingView
+                style={styles.container}
+                behavior={Platform.OS === "ios" ? "padding" : "height"}
+                keyboardVerticalOffset={Platform.OS === "ios" ? 0 : -500}
+            >
+                <ActivityConsumer>
+                    {({ isActive }) => (
+                        <View style={styles.centeredContainer}>
+                            <View style={styles.logo}>
+                                <Image source={TenseeLogo} />
+                            </View>
+                            <LoginForm disabled={isActive} />
+                            <CandleDivider label="or" />
+                            <View style={styles.socialButtons}>
+                                <SignInWithApple disabled={isActive} />
+                                <SignInWithGoogle disabled={isActive} />
+                                <SignInWithFacebook disabled={isActive} />
+                            </View>
+                        </View>
+                    )}
+                </ActivityConsumer>
+            </KeyboardAvoidingView>
+        </ActivityProvider>
     );
 };
 

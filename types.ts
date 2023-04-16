@@ -19,7 +19,7 @@ declare global {
 }
 
 export type AppTabParamList = {
-    Home: undefined;
+    Home: { fromLogin?: boolean };
 };
 
 export type AuthStackParamList = {
@@ -27,7 +27,7 @@ export type AuthStackParamList = {
     Register: undefined;
     ForgotPassword: undefined;
     ForgotPasswordReset: undefined;
-    SocialCallback: undefined; // ????
+    PinEntry: undefined;
 };
 
 export type RootStackParamList = {

@@ -1,5 +1,5 @@
 import { withNetworkActivity } from "@api/withNetworkActivity";
-import { Logger } from "@common";
+import { Logger, startChildSpan } from "@common";
 import {
     CandleButton,
     CandleForm,
@@ -10,6 +10,7 @@ import {
 } from "@components";
 import { LoginError, UnknownError } from "@errors";
 import { useAuth, useBoolean } from "@hooks";
+import { useNavigation } from "@react-navigation/native";
 import React from "react";
 import { View } from "react-native";
 import { EmailField, PasswordField } from "../CommonInputFields";
@@ -22,11 +23,16 @@ interface FormValues {
 
 interface FormProps {
     autoFocus?: boolean;
+    disabled?: boolean;
 }
 
-export const LoginForm: React.FC<FormProps> = ({ autoFocus }) => {
+export const LoginForm: React.FC<FormProps> = ({
+    autoFocus,
+    disabled = false,
+}) => {
     const doneAccessoryID = "login-form-accessory";
 
+    const { navigate } = useNavigation();
     const { login } = useAuth();
     const [isLoading, loading] = useBoolean();
 
@@ -34,21 +40,33 @@ export const LoginForm: React.FC<FormProps> = ({ autoFocus }) => {
         values: FormValues,
         actions: ICandleFormActions
     ) => {
+        const span = startChildSpan({
+            name: "Continue w/ Credentials",
+            op: "credentials",
+        });
+
         await withNetworkActivity(async () => {
             loading.on();
             try {
                 await login(values.email, values.password);
-            } catch (error: any) {
-                Logger.captureException(error);
+
+                navigate("App", {
+                    screen: "Home",
+                    params: { fromLogin: true },
+                });
+                span.finish();
+            } catch (err: any) {
+                Logger.captureException(err, span);
                 actions.setFormError(
-                    error?.message ?? "An unknown error occured"
+                    err?.message ?? "An unknown error occured"
                 );
 
-                if (error instanceof LoginError) {
-                    console.log(error.message);
-                } else if (error instanceof UnknownError) {
-                    console.log("unknown error", error);
+                if (err instanceof LoginError) {
+                    console.log(err.message);
+                } else if (err instanceof UnknownError) {
+                    console.log("unknown error", err);
                 }
+                span.finish();
             }
             loading.off();
         });
@@ -62,17 +80,18 @@ export const LoginForm: React.FC<FormProps> = ({ autoFocus }) => {
             >
                 <CandleFormErrors />
                 <EmailField
-                    {...{ autoFocus }}
+                    {...{ autoFocus, disabled }}
                     inputAccessoryViewID={doneAccessoryID}
                 />
                 <PasswordField
+                    {...{ disabled }}
                     returnKeyType="done"
                     inputAccessoryViewID={doneAccessoryID}
                 />
                 <CandleFormConsumer>
                     {({ isValid, handleSubmit }) => (
                         <CandleButton
-                            disabled={!isValid}
+                            disabled={!isValid || disabled}
                             title="Log in"
                             variant="primary"
                             loading={isLoading}

@@ -1,56 +1,101 @@
-import { useColor } from "@hooks";
-import {
-    ResponseType,
-    makeRedirectUri,
-    useAuthRequest,
-} from "expo-auth-session";
+import { Logger, Scope, startChildSpan } from "@common";
+import { useActivity, useAuth, useBoolean, useColor } from "@hooks";
+import { useNavigation } from "@react-navigation/native";
+import { Span } from "@sentry/types";
+import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
-import React, { useEffect } from "react";
-import {
-    Image,
-    Platform,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import React, { useEffect, useState } from "react";
+import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 WebBrowser.maybeCompleteAuthSession();
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const googleIcon = require("../../../assets/branding/google-icon.png");
 
-export const SignInWithGoogle = () => {
-    const androidClientId = "YOUR_ANDROID_CLIENT_ID";
-    const iosClientId = "YOUR_IOS_CLIENT_ID";
+export const SignInWithGoogle = ({ disabled = false }) => {
+    const [span, setSpan] = useState<Span | null>(null);
+    const { navigate } = useNavigation();
+    const { setUser } = useAuth();
+    const { setActive } = useActivity();
+    const [isLoading, loading] = useBoolean();
 
-    const [request, response, promptAsync] = useAuthRequest(
-        {
-            responseType: ResponseType.Token,
-            // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-            clientId: Platform.select({
-                android: "<YOUR_ANDROID_CLIENT_ID>",
-                ios: "<YOUR_IOS_CLIENT_ID>",
-            })!,
-            scopes: ["profile", "email"],
-            usePKCE: false,
-            redirectUri: makeRedirectUri({
-                scheme: "tenseeapp",
-            }),
-        },
-        {
-            authorizationEndpoint:
-                "https://accounts.google.com/o/oauth2/v2/auth",
-            tokenEndpoint: "https://www.googleapis.com/oauth2/v4/token",
-            revocationEndpoint: "https://oauth2.googleapis.com/revoke",
+    const [request, response, promptAsync] = Google.useAuthRequest({
+        androidClientId:
+            "635247457778-81rqnkohtmjilqep4jd61e9dq8h01pk6.apps.googleusercontent.com",
+        iosClientId:
+            "635247457778-6hk52aj9s8vv1u880n7b481oj4nkbke9.apps.googleusercontent.com",
+    });
+
+    const onPrompt = () => {
+        setActive(true);
+        setSpan(
+            startChildSpan({
+                name: "Continue w/ Google",
+                op: "submit_social_login",
+            })
+        );
+        promptAsync();
+    };
+
+    const getUserInfo = async (t: string) => {
+        try {
+            const data = await fetch(
+                "https://www.googleapis.com/userinfo/v2/me",
+                {
+                    headers: { Authorization: `Bearer ${t}` },
+                }
+            );
+
+            const result = await data.json();
+            Scope.setSpan(span!);
+            if (result.id) {
+                setUser({
+                    socialProvider: "google",
+                    socialAccessToken: t,
+                    firstName: result.name ?? result.given_name,
+                    email: result.email,
+                    id: result.id,
+                });
+
+                navigate("App", {
+                    screen: "Home",
+                    params: { fromLogin: true },
+                });
+            } else {
+                Logger.addBreadcrumb({
+                    type: "info",
+                    level: "info",
+                    message: "Google Response",
+                    data: result,
+                });
+                throw new Error("Google info has no ID?");
+            }
+
+            setTimeout(() => {
+                setActive(false);
+                loading.off();
+            }, 300);
+        } catch (error) {
+            Logger.captureException(error);
+            console.log(error);
+            setActive(false);
+            loading.off();
         }
-    );
+    };
 
     useEffect(() => {
         if (response?.type === "success") {
-            const { access_token } = response.params;
-            // Use the access token to fetch user's profile, email, etc.
+            const accessToken = response.authentication?.accessToken ?? null;
+            if (accessToken) {
+                getUserInfo(accessToken);
+
+                span?.finish?.();
+                return;
+            }
         }
+        setActive(false);
+        loading.off();
+        span?.finish?.();
     }, [response]);
 
     const color = useColor("black", "black");
@@ -61,7 +106,8 @@ export const SignInWithGoogle = () => {
     return (
         <TouchableOpacity
             style={[styles.buttonContainer, { backgroundColor }]}
-            onPress={() => promptAsync()}
+            onPress={onPrompt}
+            disabled={!request || disabled}
         >
             <View style={styles.centeredContainer}>
                 <View

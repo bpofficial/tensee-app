@@ -1,55 +1,79 @@
 {
-  "expo": {
-    "name": "Tensee",
-    "slug": "tensee",
-    "version": "1.0.0",
-    "scheme": "tenseeapp",
-    "orientation": "portrait",
-    "icon": "./assets/icon.png",
-    "userInterfaceStyle": "automatic",
-    "splash": {
-      "image": "./assets/splash.png",
-      "resizeMode": "contain",
-      "backgroundColor": "#161414"
-    },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
-    "ios": {
-      "supportsTablet": true,
-      "bundleIdentifier": "com.tensee.app",
-      "config": {
-        "usesNonExemptEncryption": false
-      }
-    },
-    "android": {
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/adaptive-icon.png",
-        "backgroundColor": "#161414"
-      },
-      "package": "com.tensee.app"
-    },
-    "plugins": [
-      "expo-attestation-config-plugin",
-      "expo-apple-authentication",
-      [
-        "react-native-auth0",
-        {
-          "domain": "bpktensee.au.auth0.com",
-          "customScheme": "tenseeapp"
+    "expo": {
+        "name": "Tensee",
+        "slug": "tensee-test",
+        "version": "1.0.0",
+        "scheme": "tenseeapp",
+        "orientation": "portrait",
+        "icon": "./assets/icon.png",
+        "userInterfaceStyle": "automatic",
+        "splash": {
+            "image": "./assets/splash.png",
+            "resizeMode": "contain",
+            "backgroundColor": "#161414"
+        },
+        "assetBundlePatterns": ["**/*"],
+        "ios": {
+            "supportsTablet": true,
+            "bundleIdentifier": "com.wpd.tensee.test",
+            "config": {
+                "usesNonExemptEncryption": false
+            },
+            "infoPlist": {
+                "NSFaceIDUsageDescription": "We use Face ID to securely re-authenticate you.",
+                "NSUserTrackingUsageDescription": "This identifier will be used to deliver personalized ads to you.",
+                "SKAdNetworkItems": [
+                    {
+                        "SKAdNetworkIdentifier": "v9wttpbfk9.skadnetwork"
+                    },
+                    {
+                        "SKAdNetworkIdentifier": "n38lu8286q.skadnetwork"
+                    }
+                ]
+            }
+        },
+        "android": {
+            "adaptiveIcon": {
+                "foregroundImage": "./assets/adaptive-icon.png",
+                "backgroundColor": "#161414"
+            },
+            "package": "com.wpd.tensee.test"
+        },
+        "plugins": [
+            [
+                "expo-build-properties",
+                {
+                    "android": {
+                        "enableShrinkResourcesInReleaseBuilds": true,
+                        "enableProguardInReleaseBuilds": true
+                    }
+                }
+            ],
+            [
+                "expo-attestation-config-plugin",
+                {
+                    "environment": "production"
+                }
+            ],
+            "expo-apple-authentication",
+            [
+                "react-native-auth0",
+                {
+                    "domain": "bpktensee.au.auth0.com",
+                    "customScheme": "tenseeapp"
+                }
+            ],
+            "sentry-expo",
+            "expo-localization",
+            "expo-facebook"
+        ],
+        "extra": {
+            "AUTH0_DOMAIN": "bpktensee.au.auth0.com",
+            "AUTH0_CLIENT_ID": "FC4KrwsM9DKx4tO0PGO9g1VztC9OWH1D",
+            "AUTH0_AUDIENCE": "https://api.tensee.com/v1/",
+            "eas": {
+                "projectId": "f08fbcdc-3eeb-44d3-a2ea-73dafdbbbb8d"
+            }
         }
-      ],
-      "sentry-expo",
-      "expo-localization",
-      "expo-facebook"
-    ],
-    "extra": {
-      "AUTH0_DOMAIN": "bpktensee.au.auth0.com",
-      "AUTH0_CLIENT_ID": "FC4KrwsM9DKx4tO0PGO9g1VztC9OWH1D",
-      "AUTH0_AUDIENCE": "https://api.tensee.com/v1/",
-      "eas": {
-        "projectId": "66b344d5-8fad-45d1-8338-c9d3db4067c1"
-      }
     }
-  }
 }

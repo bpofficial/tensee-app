@@ -4,10 +4,16 @@
  *
  */
 import { FontAwesome } from "@expo/vector-icons";
-import { useScreenOptions } from "@hooks";
+import {
+    useAttestation,
+    useAutoLogout,
+    useAutoRefreshToken,
+    useScreenOptions,
+} from "@hooks";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
-import * as React from "react";
+import React from "react";
 import { AppTabParamList } from "types";
+import { HomeScreen } from "./screens/Home";
 
 /**
  * A bottom tab navigator displays tab buttons on the bottom of the display to switch screens.
@@ -18,12 +24,16 @@ const BottomTab = createBottomTabNavigator<AppTabParamList>();
 export function AppTabNavigator() {
     const screenOptions = useScreenOptions();
 
+    useAutoLogout();
+    useAutoRefreshToken();
+    useAttestation();
+
     return (
         <BottomTab.Navigator
             initialRouteName="Home"
             screenOptions={screenOptions}
         >
-            {/* <BottomTab.Screen
+            <BottomTab.Screen
                 name="Home"
                 component={HomeScreen}
                 options={{
@@ -33,7 +43,7 @@ export function AppTabNavigator() {
                     ),
                 }}
             />
-            <BottomTab.Screen
+            {/*<BottomTab.Screen
                 name="Settings"
                 component={SettingsScreen}
                 options={{

@@ -1,4 +1,5 @@
 /* eslint-disable react-native/no-unused-styles */
+import { useColor } from "@hooks";
 import { Theme, useTheme } from "@rneui/themed";
 import React from "react";
 import {
@@ -43,6 +44,8 @@ export const CandleButton = ({
     const { theme } = useTheme();
     const styles = getStyles(theme);
 
+    const disabledBackground = useColor("grey6", "grey6");
+
     const buttonStyles: ViewStyle[] = [
         styles.button,
         (styles as Record<string, ViewStyle>)[variant],
@@ -62,6 +65,12 @@ export const CandleButton = ({
 
     const isSolidBackground =
         isBackgroundColorNotWhiteOrTransparent(buttonStyles);
+
+    if (isSolidBackground) {
+        if (!["outline", "plain"].includes(variant)) {
+            buttonStyles.push({ backgroundColor: disabledBackground });
+        }
+    }
 
     return (
         <TouchableOpacity
@@ -111,7 +120,7 @@ function getStyles({ colors }: Theme) {
             borderColor: colors.grey4,
         },
         disabledText: {
-            color: colors.white,
+            color: colors.grey2,
         },
         outline: {
             backgroundColor: colors.transparent,

@@ -1,5 +1,10 @@
 import { createExtendedTheme } from "@common";
-import { AuthProvider } from "@hooks";
+import {
+    AppStateProvider,
+    AuthProvider,
+    CredentialProvider,
+    PinAuthProvider,
+} from "@hooks";
 import { Navigation } from "@navigation";
 import {
     ThemeProvider,
@@ -44,13 +49,19 @@ export default function AppRoot() {
     return (
         <Sentry.Native.ErrorBoundary>
             <Sentry.Native.TouchEventBoundary>
-                <AuthProvider>
-                    <ThemeProvider theme={theme}>
-                        <SafeAreaProvider>
-                            <App />
-                        </SafeAreaProvider>
-                    </ThemeProvider>
-                </AuthProvider>
+                <AppStateProvider>
+                    <PinAuthProvider>
+                        <CredentialProvider>
+                            <AuthProvider>
+                                <ThemeProvider theme={theme}>
+                                    <SafeAreaProvider>
+                                        <App />
+                                    </SafeAreaProvider>
+                                </ThemeProvider>
+                            </AuthProvider>
+                        </CredentialProvider>
+                    </PinAuthProvider>
+                </AppStateProvider>
             </Sentry.Native.TouchEventBoundary>
         </Sentry.Native.ErrorBoundary>
     );

@@ -1,22 +1,23 @@
-import * as Network from 'expo-network';
-import * as StatusBar from 'expo-status-bar';
+import { Logger } from "@common";
+import * as Network from "expo-network";
+import * as StatusBar from "expo-status-bar";
 
 export async function withNetworkActivity<T>(cb: () => Promise<T>): Promise<T> {
     try {
-        const networkState = await Network.getNetworkStateAsync()
+        const networkState = await Network.getNetworkStateAsync();
         if (!networkState.isInternetReachable) {
-            throw new Error('Not Connected')
+            throw new Error("Not Connected");
         }
 
-        StatusBar.setStatusBarNetworkActivityIndicatorVisible(true)
+        StatusBar.setStatusBarNetworkActivityIndicatorVisible(true);
 
-        const result = await cb()
+        const result = await cb();
 
-        StatusBar.setStatusBarNetworkActivityIndicatorVisible(false)
-        
-        return result
+        StatusBar.setStatusBarNetworkActivityIndicatorVisible(false);
+
+        return result;
     } catch (err) {
-        console.log(err)
+        Logger.captureException(err);
         throw err;
     }
 }

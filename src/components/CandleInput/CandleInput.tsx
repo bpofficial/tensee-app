@@ -41,6 +41,8 @@ export const CandleInput: React.FC<ICandleInputProps> = (inputProps) => {
         ? colors.success
         : focused
         ? colors.focusOutline
+        : props.disabled
+        ? colors.grey6
         : colors.grey2;
 
     const togglePasswordVisibility = () => {
@@ -80,6 +82,7 @@ export const CandleInput: React.FC<ICandleInputProps> = (inputProps) => {
                         <CandleInputPasswordVisibilityToggle
                             isVisible={isPasswordVisible}
                             toggleVisibility={togglePasswordVisibility}
+                            disabled={props.disabled}
                         />
                     )}
                 </CandleInputRightIcon>
