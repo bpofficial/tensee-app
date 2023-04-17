@@ -1,3 +1,4 @@
+import { withSpan } from "@common";
 import {
     PropsWithChildren,
     createContext,
@@ -30,7 +31,9 @@ export const AppStateProvider = ({ children }: PropsWithChildren) => {
     }, []);
 
     const handleAppStateChange = async (nextAppState: AppStateStatus) => {
-        setAppState(nextAppState);
+        withSpan({ op: "app_state", name: "On App State Change" }, () =>
+            setAppState(nextAppState)
+        );
     };
 
     return (

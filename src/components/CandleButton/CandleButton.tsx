@@ -67,7 +67,7 @@ export const CandleButton = ({
         isBackgroundColorNotWhiteOrTransparent(buttonStyles);
 
     if (isSolidBackground) {
-        if (!["outline", "plain"].includes(variant)) {
+        if (!["outline", "plain"].includes(variant) && disabled) {
             buttonStyles.push({ backgroundColor: disabledBackground });
         }
     }

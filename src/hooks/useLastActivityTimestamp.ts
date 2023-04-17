@@ -7,7 +7,6 @@ export function useLastActivityTimestamp(): [number, (t: number) => void] {
     const { appState, previousAppState } = useAppState();
 
     const setLastActivityTimestamp = async (timestamp: number) => {
-        console.log("setting timestamp", new Date(timestamp).toString());
         try {
             await AsyncStorage.setItem(
                 "lastActivityTimestamp",
@@ -39,10 +38,6 @@ export function useLastActivityTimestamp(): [number, (t: number) => void] {
             appState === "active"
         ) {
             const ts = await getLastActivityTimestamp();
-            console.log(
-                "app active, last activity at",
-                new Date(ts).toString()
-            );
             await setLastActivityTimestamp(ts);
             setTimestamp(ts);
         } else if (
@@ -50,10 +45,6 @@ export function useLastActivityTimestamp(): [number, (t: number) => void] {
             previousAppState === "active"
         ) {
             const now = Date.now();
-            console.log(
-                "app not active, last activity at",
-                new Date().toString()
-            );
             await setLastActivityTimestamp(now);
             setTimestamp(now);
         }

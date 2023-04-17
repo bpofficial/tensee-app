@@ -27,9 +27,6 @@ export function useAutoLogout() {
                         lastActivityTimestamp + Config.auth0.autoLogoutAfter;
                     const now = Date.now();
 
-                    console.log("Logout out: ", new Date(logoutAt).toString());
-                    console.log("Now:", new Date().toString());
-                    console.log("Token expired:", isExpired);
                     if (logoutAt <= now && isExpired) {
                         navigate("Auth");
                     }

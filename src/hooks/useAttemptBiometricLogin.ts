@@ -1,9 +1,11 @@
-import { useNavigation } from "@react-navigation/native";
+import { useIsFocused, useNavigation } from "@react-navigation/native";
 import * as LocalAuthentication from "expo-local-authentication";
+import { useEffect } from "react";
 import { useCredentialActions } from "./CredentialContext";
 import { usePinSettings } from "./PinAuthContext";
 
 export function useAttemptBiometricLogin() {
+    const isFocused = useIsFocused();
     const { navigate } = useNavigation();
     const { refreshAccessToken, isRefreshTokenExpired } =
         useCredentialActions();
@@ -52,5 +54,7 @@ export function useAttemptBiometricLogin() {
         }
     };
 
-    return attemptBiometrics;
+    useEffect(() => {
+        if (isFocused) attemptBiometrics();
+    }, [isFocused]);
 }

@@ -1,5 +1,5 @@
 import { withNetworkActivity } from "@api/withNetworkActivity";
-import { Logger, startChildSpan } from "@common";
+import { captureError, startChildSpan } from "@common";
 import {
     CandleButton,
     CandleForm,
@@ -34,7 +34,6 @@ export const RegisterForm = () => {
     ) => {
         const span = startChildSpan({
             name: "Register",
-            new: true,
         });
 
         await withNetworkActivity(async () => {
@@ -45,7 +44,7 @@ export const RegisterForm = () => {
                 span.finish();
                 actions.resetForm();
             } catch (err: any) {
-                Logger.captureException(err, span);
+                captureError(err, span);
                 actions.setFormError(
                     err?.message ?? "An unknown error occured"
                 );
@@ -55,8 +54,6 @@ export const RegisterForm = () => {
                 } else if (err instanceof UnknownError) {
                     console.log("unknown error");
                 }
-
-                span.finish();
             }
             loading.off();
         });

@@ -22,11 +22,11 @@ import { HomeScreen } from "./screens/Home";
 const BottomTab = createBottomTabNavigator<AppTabParamList>();
 
 export function AppTabNavigator() {
-    const screenOptions = useScreenOptions();
-
     useAutoLogout();
-    useAutoRefreshToken();
     useAttestation();
+    useAutoRefreshToken();
+
+    const screenOptions = useScreenOptions();
 
     return (
         <BottomTab.Navigator

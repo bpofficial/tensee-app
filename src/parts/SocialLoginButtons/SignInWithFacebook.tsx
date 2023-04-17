@@ -1,4 +1,4 @@
-import { Config, Logger, Scope, startChildSpan } from "@common";
+import { Config, Logger, Scope, captureError, startChildSpan } from "@common";
 import { useActivity, useAuth, useBoolean, useColor } from "@hooks";
 import { useNavigation } from "@react-navigation/native";
 import { Span } from "@sentry/types";
@@ -83,12 +83,10 @@ export const SignInWithFacebook = ({ disabled = false }) => {
                 throw new Error("Facebook info has no ID?");
             }
         } catch (error) {
-            Logger.captureException(error);
-            console.log(error);
+            captureError(error, child);
             setActive(false);
             loading.off();
         }
-        child?.finish();
     };
 
     useEffect(() => {

@@ -1,4 +1,4 @@
-import { Config, Logger, startChildSpan } from "@common";
+import { Config, captureError, startChildSpan, withSpan } from "@common";
 import { RefreshAccessTokenFailedError } from "../../errors/RefreshAccessTokenFailedError";
 import { getSecureItem, setSecureItem } from "../../utils/secureStorage";
 import { api } from "../constants";
@@ -11,17 +11,22 @@ export async function refreshAccessToken(): Promise<RefreshStatus> {
     const span = startChildSpan({
         name: "Refresh Access Token",
         op: "refresh_token",
-        new: true,
     });
 
     try {
-        const state = await createAppState();
+        const state = await withSpan({ op: "create_state", parent: span }, () =>
+            createAppState()
+        );
 
-        const [refreshToken, rtExpiry, atExpiry] = await Promise.all([
-            getSecureItem(api.secureStorageKey + "_refreshToken"),
-            getSecureItem(api.secureStorageKey + "_rtExpiresAt"), // refresh token expiry
-            getSecureItem(api.secureStorageKey + "_atExpiresAt"), // access token expiry
-        ]);
+        const [refreshToken, rtExpiry, atExpiry] = await withSpan(
+            { op: "secure_read", parent: span },
+            () =>
+                Promise.all([
+                    getSecureItem(api.secureStorageKey + "_refreshToken"),
+                    getSecureItem(api.secureStorageKey + "_rtExpiresAt"), // refresh token expiry
+                    getSecureItem(api.secureStorageKey + "_atExpiresAt"), // access token expiry
+                ])
+        );
 
         const now = Date.now() / 1000;
         const accessTokenExpiry = Number(atExpiry);
@@ -38,17 +43,17 @@ export async function refreshAccessToken(): Promise<RefreshStatus> {
         if (now >= accessTokenExpiry) {
             // and we have a refresh token, and it hasn't expired...
             if (refreshToken && now <= refreshTokenExpiry) {
-                try {
-                    const data = await withNetworkActivity(async () => {
-                        const child = span.startChild({
+                const data = await withNetworkActivity(async () => {
+                    const response = await withSpan(
+                        {
                             op: "http",
                             description: "Request new access token",
-                        });
-
-                        try {
+                            parent: span,
+                        },
+                        () => {
                             const scope = `appstate:${state}`;
 
-                            const response = await fetch(
+                            return fetch(
                                 `https://${Config.auth0.domain}/oauth/token`,
                                 {
                                     method: "POST",
@@ -63,28 +68,25 @@ export async function refreshAccessToken(): Promise<RefreshStatus> {
                                     },
                                 }
                             );
-
-                            child.setHttpStatus(response.status);
-                            child.finish();
-                            return response.json();
-                        } catch (err) {
-                            Logger.captureException(err, child);
-                            console.log(err);
-                            child.finish();
                         }
-                        return null;
-                    });
-
-                    if (data === null) {
-                        throw new RefreshAccessTokenFailedError();
+                    );
+                    if (response.ok) {
+                        return response.json();
                     }
+                    return null;
+                });
 
-                    try {
-                        const accessTokenExpiry = (
-                            now + Config.auth0.autoLogoutAfter
-                        ).toString();
+                if (data === null) {
+                    throw new RefreshAccessTokenFailedError();
+                }
 
-                        await Promise.all([
+                try {
+                    const accessTokenExpiry = (
+                        now + Config.auth0.autoLogoutAfter
+                    ).toString();
+
+                    await withSpan({ op: "secure_write", parent: span }, () =>
+                        Promise.all([
                             setSecureItem(
                                 api.secureStorageKey + "_accessToken",
                                 data.access_token
@@ -93,14 +95,11 @@ export async function refreshAccessToken(): Promise<RefreshStatus> {
                                 api.secureStorageKey + "_atExpiresAt",
                                 accessTokenExpiry
                             ),
-                        ]);
-                        return RefreshStatus.ALL_ACTIVE;
-                    } catch (err) {
-                        Logger.captureException(err, span);
-                    }
+                        ])
+                    );
+                    return RefreshStatus.ALL_ACTIVE;
                 } catch (err) {
-                    Logger.captureException(err);
-                    throw new RefreshAccessTokenFailedError();
+                    captureError(err, span);
                 }
             } else {
                 // Refresh token has expired
@@ -110,8 +109,7 @@ export async function refreshAccessToken(): Promise<RefreshStatus> {
         }
         return RefreshStatus.ALL_ACTIVE;
     } catch (err) {
-        Logger.captureException(err, span);
-        span.finish();
+        captureError(err, span);
         console.log(err);
         return RefreshStatus.FAILED;
     }

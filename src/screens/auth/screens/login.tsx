@@ -10,8 +10,7 @@ import {
     SignInWithFacebook,
     SignInWithGoogle,
 } from "@parts";
-import { useIsFocused } from "@react-navigation/native";
-import React, { useEffect } from "react";
+import React from "react";
 import {
     Image,
     KeyboardAvoidingView,
@@ -24,12 +23,7 @@ import {
 const TenseeLogo = require("../../../../assets/icon-transparent.png");
 
 export const LoginScreen = () => {
-    const isFocused = useIsFocused();
-    const attemptBiometricLogin = useAttemptBiometricLogin();
-
-    useEffect(() => {
-        if (isFocused) attemptBiometricLogin();
-    }, [isFocused]);
+    useAttemptBiometricLogin();
 
     return (
         <ActivityProvider>

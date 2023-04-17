@@ -1,4 +1,4 @@
-import { Logger, Scope, startChildSpan } from "@common";
+import { Scope, captureError, startChildSpan } from "@common";
 import { useActivity, useAuth, useColor } from "@hooks";
 import { useNavigation } from "@react-navigation/native";
 import * as AppleAuthentication from "expo-apple-authentication";
@@ -54,8 +54,7 @@ export const SignInWithApple = ({ disabled = false }) => {
                 span.finish();
             }
         } catch (err: any) {
-            Logger.captureException(err, span);
-            span.finish();
+            captureError(err, span);
             if (err.code === "ERR_CANCELED") {
                 // console.log("Apple login was canceled");
             } else {

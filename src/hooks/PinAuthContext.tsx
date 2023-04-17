@@ -8,6 +8,7 @@ interface IPinAuthContext {
     setPin(pin: Pin): Promise<void>;
     hasPinSet(): Promise<boolean>;
     verifyMatch(pin: Pin): Promise<boolean>;
+    clearPin(): Promise<void>;
 }
 
 const PinAuthContext = createContext<IPinAuthContext>({
@@ -19,6 +20,9 @@ const PinAuthContext = createContext<IPinAuthContext>({
     },
     verifyMatch: async () => {
         return false;
+    },
+    clearPin: async () => {
+        //
     },
 });
 
@@ -47,6 +51,10 @@ export const PinAuthProvider = ({ children }: PropsWithChildren) => {
         return pin !== null;
     };
 
+    const clearPin = async () => {
+        await setSecureItem("_pin", null);
+    };
+
     const verifyMatch = async (pin: Pin) => {
         const existingPinHash = await getPin();
         const inputPinHash = await hashPin(pin);
@@ -60,6 +68,7 @@ export const PinAuthProvider = ({ children }: PropsWithChildren) => {
                 hasPinSet,
                 verifyMatch,
                 setPin,
+                clearPin,
             }}
         >
             {children}

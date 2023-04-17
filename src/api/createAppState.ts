@@ -1,4 +1,4 @@
-import { Logger, startChildSpan } from "@common";
+import { withSpan } from "@common";
 import { getOrCreateDeviceId } from "@utils";
 import { Buffer } from "buffer";
 import * as Application from "expo-application";
@@ -7,49 +7,44 @@ import * as Device from "expo-device";
 import { getCalendars, getLocales } from "expo-localization";
 
 export async function createAppState(device?: string) {
-    const span = startChildSpan({
-        name: "Create App State",
-        op: "state",
-    });
+    return withSpan(
+        {
+            name: "Create App State",
+            op: "create_state",
+        },
+        async () => {
+            const deviceId = device || (await getOrCreateDeviceId());
+            const type = await Device.getDeviceTypeAsync();
+            const brand = Device.brand;
+            const name = Device.deviceName;
+            const year = Device.deviceYearClass;
+            const manufacturer = Device.manufacturer;
+            const model = Device.modelId;
+            const buildVersion = Application.nativeApplicationVersion;
+            const buildId = Application.nativeBuildVersion;
+            const runtimeVersion =
+                Constants.manifest?.runtimeVersion?.toString();
 
-    try {
-        const deviceId = device || (await getOrCreateDeviceId());
-        const type = await Device.getDeviceTypeAsync();
-        const brand = Device.brand;
-        const name = Device.deviceName;
-        const year = Device.deviceYearClass;
-        const manufacturer = Device.manufacturer;
-        const model = Device.modelId;
-        const buildVersion = Application.nativeApplicationVersion;
-        const buildId = Application.nativeBuildVersion;
-        const runtimeVersion = Constants.manifest?.runtimeVersion?.toString();
+            const calendar = getCalendars()[0];
+            const locale = getLocales()[0];
 
-        const calendar = getCalendars()[0];
-        const locale = getLocales()[0];
+            const state = {
+                date: Date.now(),
+                tz: calendar.timeZone,
+                locale: locale.languageCode,
+                type,
+                brand,
+                name,
+                year,
+                manufacturer,
+                model,
+                buildVersion,
+                buildId,
+                runtimeVersion,
+                deviceId,
+            };
 
-        const state = {
-            date: Date.now(),
-            tz: calendar.timeZone,
-            locale: locale.languageCode,
-            type,
-            brand,
-            name,
-            year,
-            manufacturer,
-            model,
-            buildVersion,
-            buildId,
-            runtimeVersion,
-            deviceId,
-        };
-
-        const result = Buffer.from(JSON.stringify(state)).toString("base64");
-
-        span.finish();
-        return result;
-    } catch (err) {
-        Logger.captureException(err, span);
-        span.finish();
-        throw err;
-    }
+            return Buffer.from(JSON.stringify(state)).toString("base64");
+        }
+    );
 }

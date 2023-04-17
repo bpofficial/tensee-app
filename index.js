@@ -11,7 +11,7 @@ Sentry.init({
     enableNativeCrashHandling: true,
     enableOutOfMemoryTracking: true,
     // tracesSampler: (ctx) => console.log("Trace: ", ctx),
-    tracesSampleRate: 0.2,
+    tracesSampleRate: 1.0,
     sampleRate: 1.0,
     integrations: [
         new Sentry.Native.ReactNativeTracing({

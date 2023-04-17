@@ -6,7 +6,7 @@ import {
 } from "@api";
 import { auth0 } from "@api/auth/auth0";
 import { api } from "@api/constants";
-import { Config, Logger } from "@common";
+import { Config, withSpan } from "@common";
 import { getSecureItem, setSecureItem } from "@utils";
 import React, {
     PropsWithChildren,
@@ -59,69 +59,81 @@ export const CredentialProvider = ({ children }: PropsWithChildren) => {
     const [isLoading, loading] = useBoolean();
 
     const storeCredentials = (credentials: Credentials) => {
-        InteractionManager.runAfterInteractions(async () => {
-            try {
-                const now = Date.now() / 1000;
+        InteractionManager.runAfterInteractions(() => {
+            withSpan(
+                {
+                    op: "store_credentials",
+                    name: "Save credentials to storage",
+                    description: `Store the provided credentials securely 
+                                  alonside their expiry dates.`,
+                },
+                async () => {
+                    const now = Date.now() / 1000;
 
-                const promises = [];
-                if (credentials.accessToken) {
-                    const accessTokenExpiry = (
-                        now + Config.auth0.autoLogoutAfter
-                    ).toString();
+                    const promises = [];
+                    if (credentials.accessToken) {
+                        const accessTokenExpiry = (
+                            now + Config.auth0.autoLogoutAfter
+                        ).toString();
 
-                    setAccessToken(credentials.accessToken);
-                    promises.push(
-                        setSecureItem(
-                            api.secureStorageKey + "_accessToken",
-                            credentials.accessToken
-                        )
-                    );
-                    promises.push(
-                        setSecureItem(
-                            api.secureStorageKey + "_atExpiresAt",
-                            accessTokenExpiry
-                        )
-                    );
+                        setAccessToken(credentials.accessToken);
+                        promises.push(
+                            setSecureItem(
+                                api.secureStorageKey + "_accessToken",
+                                credentials.accessToken
+                            )
+                        );
+                        promises.push(
+                            setSecureItem(
+                                api.secureStorageKey + "_atExpiresAt",
+                                accessTokenExpiry
+                            )
+                        );
+                    }
+
+                    if (credentials.refreshToken) {
+                        const refreshTokenExpiry = (
+                            now + api.refreshTokenLifetime
+                        ).toString();
+
+                        promises.push(
+                            setSecureItem(
+                                api.secureStorageKey + "_refreshToken",
+                                credentials.refreshToken
+                            )
+                        );
+                        promises.push(
+                            setSecureItem(
+                                api.secureStorageKey + "_rtExpiresAt",
+                                refreshTokenExpiry
+                            )
+                        );
+                    }
+
+                    await Promise.all(promises);
                 }
-
-                if (credentials.refreshToken) {
-                    const refreshTokenExpiry = (
-                        now + api.refreshTokenLifetime
-                    ).toString();
-
-                    promises.push(
-                        setSecureItem(
-                            api.secureStorageKey + "_refreshToken",
-                            credentials.refreshToken
-                        )
-                    );
-                    promises.push(
-                        setSecureItem(
-                            api.secureStorageKey + "_rtExpiresAt",
-                            refreshTokenExpiry
-                        )
-                    );
-                }
-
-                await Promise.all(promises);
-            } catch (err) {
-                Logger.captureException(err);
-            }
+            ).catch();
         });
     };
 
     const clearCredentials = async () => {
-        try {
-            setAccessToken(null);
-            await Promise.all([
-                setSecureItem(api.secureStorageKey + "_accessToken", null),
-                setSecureItem(api.secureStorageKey + "_refreshToken", null),
-                setSecureItem(api.secureStorageKey + "_atExpiresAt", null),
-                setSecureItem(api.secureStorageKey + "_rtExpiresAt", null),
-            ]);
-        } catch (err) {
-            Logger.captureException(err);
-        }
+        withSpan(
+            {
+                op: "clear_credentials",
+                name: "Clear stored credentials",
+                description:
+                    "Removes all credentials that are stored on the device.",
+            },
+            async () => {
+                setAccessToken(null);
+                await Promise.all([
+                    setSecureItem(api.secureStorageKey + "_accessToken", null),
+                    setSecureItem(api.secureStorageKey + "_refreshToken", null),
+                    setSecureItem(api.secureStorageKey + "_atExpiresAt", null),
+                    setSecureItem(api.secureStorageKey + "_rtExpiresAt", null),
+                ]);
+            }
+        ).catch();
     };
 
     const isTokenExpired = async (t: "refresh" | "access") => {
@@ -146,16 +158,25 @@ export const CredentialProvider = ({ children }: PropsWithChildren) => {
 
     const refreshAccessToken = async () => {
         loading.on();
-        console.log("refresh token");
         const result = await TokenActions.refreshAccessToken();
         if (result === RefreshStatus.ALL_ACTIVE) {
             // Update the access token here...
-            const newAccessToken = await getSecureItem(
-                api.secureStorageKey + "_accessToken"
+            await withSpan(
+                {
+                    op: "update_access_token",
+                    name: "Update state with new token",
+                    description: `When the access token has been refreshed it'll be stored securely.
+                                  Read that and update the react state with it.`,
+                },
+                async () => {
+                    const newAccessToken = await getSecureItem(
+                        api.secureStorageKey + "_accessToken"
+                    );
+                    if (newAccessToken?.length) {
+                        setAccessToken(newAccessToken);
+                    }
+                }
             );
-            if (newAccessToken?.length) {
-                setAccessToken(newAccessToken);
-            }
         }
         loading.off();
         return result;
@@ -163,7 +184,6 @@ export const CredentialProvider = ({ children }: PropsWithChildren) => {
 
     const exchangeSocialTokens = async (user: IntermediateUserInfo) => {
         if (user.socialAccessToken) {
-            console.log("exchangeSocialTokens");
             loading.on();
             let credentials: Credentials | null = null;
             if (user.socialProvider === "facebook") {
@@ -180,18 +200,27 @@ export const CredentialProvider = ({ children }: PropsWithChildren) => {
                 //
             }
 
-            if (credentials !== null) {
-                const userProfile = await auth0.auth.userInfo({
-                    token: credentials.accessToken,
-                });
+            return withSpan(
+                {
+                    op: "get_social_info",
+                    name: "Get user info from social access token",
+                    description: `After exchanging the social token for an Auth0 token, 
+                                  get the user info associated with it.`,
+                },
+                async () => {
+                    if (credentials !== null) {
+                        const userProfile = await auth0.auth.userInfo({
+                            token: credentials.accessToken,
+                        });
 
-                console.log(credentials);
-
-                storeCredentials(credentials);
-                loading.off();
-                return userProfile;
-            }
-            loading.off();
+                        storeCredentials(credentials);
+                        loading.off();
+                        return userProfile;
+                    }
+                    loading.off();
+                    return null;
+                }
+            );
         }
         return null;
     };

@@ -1,6 +1,7 @@
 import { createExtendedTheme } from "@common";
 import {
     AppStateProvider,
+    AttestationProvider,
     AuthProvider,
     CredentialProvider,
     PinAuthProvider,
@@ -53,11 +54,13 @@ export default function AppRoot() {
                     <PinAuthProvider>
                         <CredentialProvider>
                             <AuthProvider>
-                                <ThemeProvider theme={theme}>
-                                    <SafeAreaProvider>
-                                        <App />
-                                    </SafeAreaProvider>
-                                </ThemeProvider>
+                                <AttestationProvider>
+                                    <ThemeProvider theme={theme}>
+                                        <SafeAreaProvider>
+                                            <App />
+                                        </SafeAreaProvider>
+                                    </ThemeProvider>
+                                </AttestationProvider>
                             </AuthProvider>
                         </CredentialProvider>
                     </PinAuthProvider>

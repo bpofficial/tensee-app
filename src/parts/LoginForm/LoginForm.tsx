@@ -1,18 +1,17 @@
 import { withNetworkActivity } from "@api/withNetworkActivity";
-import { Logger, startChildSpan } from "@common";
+import { captureError, startChildSpan } from "@common";
 import {
     CandleButton,
     CandleForm,
     CandleFormConsumer,
     CandleFormErrors,
-    CandleInputDoneAccessory,
     ICandleFormActions,
 } from "@components";
 import { LoginError, UnknownError } from "@errors";
 import { useAuth, useBoolean } from "@hooks";
 import { useNavigation } from "@react-navigation/native";
 import React from "react";
-import { View } from "react-native";
+import { Keyboard, View } from "react-native";
 import { EmailField, PasswordField } from "../CommonInputFields";
 import { LoginFormValidationSchema } from "./validationSchema";
 
@@ -30,8 +29,6 @@ export const LoginForm: React.FC<FormProps> = ({
     autoFocus,
     disabled = false,
 }) => {
-    const doneAccessoryID = "login-form-accessory";
-
     const { navigate } = useNavigation();
     const { login } = useAuth();
     const [isLoading, loading] = useBoolean();
@@ -48,15 +45,16 @@ export const LoginForm: React.FC<FormProps> = ({
         await withNetworkActivity(async () => {
             loading.on();
             try {
+                Keyboard.dismiss();
                 await login(values.email, values.password);
 
+                span.finish();
                 navigate("App", {
                     screen: "Home",
                     params: { fromLogin: true },
                 });
-                span.finish();
             } catch (err: any) {
-                Logger.captureException(err, span);
+                captureError(err, span);
                 actions.setFormError(
                     err?.message ?? "An unknown error occured"
                 );
@@ -66,7 +64,6 @@ export const LoginForm: React.FC<FormProps> = ({
                 } else if (err instanceof UnknownError) {
                     console.log("unknown error", err);
                 }
-                span.finish();
             }
             loading.off();
         });
@@ -77,17 +74,11 @@ export const LoginForm: React.FC<FormProps> = ({
             <CandleForm
                 onSubmit={handleLogin}
                 schema={LoginFormValidationSchema}
+                clearOnFocusOut
             >
                 <CandleFormErrors />
-                <EmailField
-                    {...{ autoFocus, disabled }}
-                    inputAccessoryViewID={doneAccessoryID}
-                />
-                <PasswordField
-                    {...{ disabled }}
-                    returnKeyType="done"
-                    inputAccessoryViewID={doneAccessoryID}
-                />
+                <EmailField {...{ autoFocus, disabled }} />
+                <PasswordField {...{ disabled }} returnKeyType="done" />
                 <CandleFormConsumer>
                     {({ isValid, handleSubmit }) => (
                         <CandleButton
@@ -100,7 +91,6 @@ export const LoginForm: React.FC<FormProps> = ({
                     )}
                 </CandleFormConsumer>
             </CandleForm>
-            <CandleInputDoneAccessory id={doneAccessoryID} />
         </View>
     );
 };

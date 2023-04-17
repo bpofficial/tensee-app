@@ -1,3 +1,4 @@
+import { useIsFocused } from "@react-navigation/native";
 import {
     PropsWithChildren,
     useCallback,
@@ -28,6 +29,7 @@ export interface ICandleFormProps<T extends Yup.ObjectSchema<Yup.AnyObject>> {
         values: Required<SchemaValues<SchemaKeys<T>, string>>,
         actions: ICandleFormActions
     ): void;
+    clearOnFocusOut?: boolean;
 }
 
 /**
@@ -37,7 +39,9 @@ export const CandleForm = <T extends Yup.ObjectSchema<Yup.AnyObject>>({
     schema,
     onSubmit,
     children,
+    clearOnFocusOut = false,
 }: PropsWithChildren<ICandleFormProps<T>>) => {
+    const isFocused = useIsFocused();
     const fieldKeys = useMemo(() => Object.keys(schema.fields), []);
     const inputRefs = fieldKeys.map(() => useRef<TextInput | null>(null));
 
@@ -49,6 +53,12 @@ export const CandleForm = <T extends Yup.ObjectSchema<Yup.AnyObject>>({
     >({});
 
     const [formError, setFormError] = useState<string | undefined>();
+
+    useEffect(() => {
+        if (!isFocused && clearOnFocusOut) {
+            handleFormReset();
+        }
+    }, [isFocused, clearOnFocusOut]);
 
     /**
      * Handles changes to a field.

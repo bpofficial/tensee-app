@@ -58,6 +58,9 @@ export const CandleInput: React.FC<ICandleInputProps> = (inputProps) => {
                 props.onFocus?.(e);
                 setFocused(true);
             }}
+            blurOnSubmit={
+                props.blurOnSubmit !== undefined ? props.blurOnSubmit : true
+            }
             onBlur={(e) => {
                 props.onBlur?.(e);
                 setFocused(false);

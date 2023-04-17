@@ -1,4 +1,4 @@
-import { Logger } from "@common";
+import { captureError } from "@common";
 import * as Network from "expo-network";
 import * as StatusBar from "expo-status-bar";
 
@@ -17,7 +17,7 @@ export async function withNetworkActivity<T>(cb: () => Promise<T>): Promise<T> {
 
         return result;
     } catch (err) {
-        Logger.captureException(err);
+        captureError(err, null, { level: "info" });
         throw err;
     }
 }
