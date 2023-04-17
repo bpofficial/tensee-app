@@ -1,7 +1,7 @@
-import { sendAttestation } from "./sendAttestation";
+import { attestDevice } from "./attestDevice";
 
 export const Attestation = {
-    sendAttestation,
+    attestDevice,
 };
 
 export * from "./types";

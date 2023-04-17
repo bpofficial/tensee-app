@@ -1,3 +1,4 @@
+import { tracedFetch } from "@api/fetch";
 import { Logger, Scope, startChildSpan } from "@common";
 import { useActivity, useAuth, useBoolean, useColor } from "@hooks";
 import { useNavigation } from "@react-navigation/native";
@@ -39,11 +40,12 @@ export const SignInWithGoogle = ({ disabled = false }) => {
 
     const getUserInfo = async (t: string) => {
         try {
-            const data = await fetch(
+            const data = await tracedFetch(
                 "https://www.googleapis.com/userinfo/v2/me",
                 {
                     headers: { Authorization: `Bearer ${t}` },
-                }
+                },
+                span
             );
 
             const result = await data.json();

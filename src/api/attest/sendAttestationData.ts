@@ -3,26 +3,33 @@ import { tracedFetch } from "@api/fetch";
 import { withSpan } from "@common";
 import { Span } from "@sentry/types";
 
-export async function getChallenge(
+export async function submitAttestation(
     device: string,
-    state: string,
+    challenge: string,
+    keyId: string,
+    attestation: string,
     token: string,
     parent?: Span
-): Promise<string | null> {
+) {
     try {
         const result = await withSpan(
             {
                 op: "http",
-                name: "Get Attestation Challenge",
-                description:
-                    "Fetch the attestation/integrity challenge from the API",
+                name: "Submit Attestation",
+                description: "Send attestation data to the API",
                 parent,
             },
             (span) =>
                 tracedFetch(
-                    api.apiUrl +
-                        `/v1/attest/challenge?state=${state}&device=${device}`,
+                    api.apiUrl + "/v1/attest",
                     {
+                        method: "POST",
+                        body: JSON.stringify({
+                            device,
+                            keyId,
+                            challenge,
+                            attestation,
+                        }),
                         headers: {
                             Authorization: `Bearer ${token}`,
                         },
@@ -30,13 +37,10 @@ export async function getChallenge(
                     span
                 )
         );
-
-        if (result === null) return null;
-
-        const challenge = (await result.json()).challenge;
-        return challenge;
+        if (result === null) return false;
+        return result.ok;
     } catch (err) {
         console.error(err);
     }
-    return null;
+    return false;
 }

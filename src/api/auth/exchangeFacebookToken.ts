@@ -1,5 +1,6 @@
+import { tracedFetch } from "@api/fetch";
 import { Config, startChildSpan, withSpan } from "@common";
-import { Credentials } from "react-native-auth0";
+import { Credentials, UserInfo } from "react-native-auth0";
 import { auth0 } from "./auth0";
 import { IntermediateUserInfo } from "./types";
 
@@ -20,22 +21,24 @@ export const exchangeFacebookAccessToken = async (
                 name: "Facebook Exchange",
                 parent: span,
             },
-            async () => {
+            async (thisSpan) => {
                 let params = "grant_type=fb_attenuate_token";
                 params += `&client_id=${Config.facebook.clientId}`;
                 params += `&fb_exchange_token=${facebookAccessToken}`;
-                const subjectTokenResponse = await fetch(
+                const subjectTokenResponse = await tracedFetch(
                     "https://graph.facebook.com/v5.0/oauth/access_token?" +
-                        params
+                        params,
+                    null,
+                    thisSpan
                 );
 
                 const data = await subjectTokenResponse.json();
-                return data.access_token;
+                return data.access_token as string | undefined;
             }
         );
 
-        if (subjectToken) {
-            const userProfile = {} as any;
+        if (typeof subjectToken === "string" && subjectToken.length > 0) {
+            const userProfile = {} as UserInfo;
             if (profile.firstName) userProfile.name = profile.firstName;
             if (profile.email) userProfile.email = profile.email;
 
@@ -59,10 +62,10 @@ export const exchangeFacebookAccessToken = async (
             );
 
             span.finish();
-
             return result;
         }
     } catch (error) {
+        // We only log because we expect that withSpan will capture exceptions.
         console.error(error);
     }
     span.finish();

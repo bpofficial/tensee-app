@@ -1,5 +1,5 @@
+import { tracedFetch } from "@api/fetch";
 import { Config, captureError, startChildSpan, withSpan } from "@common";
-import { RefreshAccessTokenFailedError } from "../../errors/RefreshAccessTokenFailedError";
 import { getSecureItem, setSecureItem } from "../../utils/secureStorage";
 import { api } from "../constants";
 import { createAppState } from "../createAppState";
@@ -18,24 +18,42 @@ export async function refreshAccessToken(): Promise<RefreshStatus> {
             createAppState()
         );
 
-        const [refreshToken, rtExpiry, atExpiry] = await withSpan(
-            { op: "secure_read", parent: span },
-            () =>
-                Promise.all([
-                    getSecureItem(api.secureStorageKey + "_refreshToken"),
-                    getSecureItem(api.secureStorageKey + "_rtExpiresAt"), // refresh token expiry
-                    getSecureItem(api.secureStorageKey + "_atExpiresAt"), // access token expiry
-                ])
+        const items = await withSpan({ op: "secure_read", parent: span }, () =>
+            Promise.allSettled([
+                getSecureItem(api.secureStorageKey + "_refreshToken"),
+                getSecureItem(api.secureStorageKey + "_rtExpiresAt"), // refresh token expiry
+                getSecureItem(api.secureStorageKey + "_atExpiresAt"), // access token expiry
+            ])
         );
 
+        if (items === null) return RefreshStatus.FAILED;
+        const [refreshToken, refreshExpiry, tokenExpiry] = items;
+
+        if (
+            refreshToken.status === "rejected" ||
+            refreshExpiry.status === "rejected" ||
+            tokenExpiry.status === "rejected"
+        ) {
+            return RefreshStatus.FAILED;
+        }
+
+        if (
+            refreshToken.value === null ||
+            refreshExpiry.value === null ||
+            tokenExpiry.value === null
+        ) {
+            return RefreshStatus.FAILED;
+        }
+
         const now = Date.now() / 1000;
-        const accessTokenExpiry = Number(atExpiry);
-        const refreshTokenExpiry = Number(rtExpiry);
+        const accessTokenExpiry = Number(tokenExpiry.value);
+        const refreshTokenExpiry = Number(refreshExpiry.value);
 
         if (
             Number.isNaN(accessTokenExpiry) ||
             Number.isNaN(refreshTokenExpiry)
         ) {
+            span.finish();
             return RefreshStatus.FAILED;
         }
 
@@ -50,10 +68,10 @@ export async function refreshAccessToken(): Promise<RefreshStatus> {
                             description: "Request new access token",
                             parent: span,
                         },
-                        () => {
+                        (thisSpan) => {
                             const scope = `appstate:${state}`;
 
-                            return fetch(
+                            return tracedFetch(
                                 `https://${Config.auth0.domain}/oauth/token`,
                                 {
                                     method: "POST",
@@ -66,10 +84,14 @@ export async function refreshAccessToken(): Promise<RefreshStatus> {
                                     headers: {
                                         "Content-Type": "application/json",
                                     },
-                                }
+                                },
+                                thisSpan
                             );
                         }
                     );
+                    if (response === null) {
+                        return null;
+                    }
                     if (response.ok) {
                         return response.json();
                     }
@@ -77,30 +99,27 @@ export async function refreshAccessToken(): Promise<RefreshStatus> {
                 });
 
                 if (data === null) {
-                    throw new RefreshAccessTokenFailedError();
+                    span.finish();
+                    return RefreshStatus.FAILED;
                 }
 
-                try {
-                    const accessTokenExpiry = (
-                        now + Config.auth0.autoLogoutAfter
-                    ).toString();
+                const accessTokenExpiry = (
+                    now + Config.auth0.autoLogoutAfter
+                ).toString();
 
-                    await withSpan({ op: "secure_write", parent: span }, () =>
-                        Promise.all([
-                            setSecureItem(
-                                api.secureStorageKey + "_accessToken",
-                                data.access_token
-                            ),
-                            setSecureItem(
-                                api.secureStorageKey + "_atExpiresAt",
-                                accessTokenExpiry
-                            ),
-                        ])
-                    );
-                    return RefreshStatus.ALL_ACTIVE;
-                } catch (err) {
-                    captureError(err, span);
-                }
+                await withSpan({ op: "secure_write", parent: span }, () =>
+                    Promise.all([
+                        setSecureItem(
+                            api.secureStorageKey + "_accessToken",
+                            data.access_token
+                        ),
+                        setSecureItem(
+                            api.secureStorageKey + "_atExpiresAt",
+                            accessTokenExpiry
+                        ),
+                    ])
+                );
+                return RefreshStatus.ALL_ACTIVE;
             } else {
                 // Refresh token has expired
                 console.log("refresh token has expired...");
@@ -109,8 +128,8 @@ export async function refreshAccessToken(): Promise<RefreshStatus> {
         }
         return RefreshStatus.ALL_ACTIVE;
     } catch (err) {
+        console.error(err);
         captureError(err, span);
-        console.log(err);
         return RefreshStatus.FAILED;
     }
 }

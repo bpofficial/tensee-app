@@ -1,3 +1,4 @@
+import { tracedFetch } from "@api/fetch";
 import { Config, Logger, Scope, captureError, startChildSpan } from "@common";
 import { useActivity, useAuth, useBoolean, useColor } from "@hooks";
 import { useNavigation } from "@react-navigation/native";
@@ -46,8 +47,10 @@ export const SignInWithFacebook = ({ disabled = false }) => {
             op: "retrieve_user_profile",
         });
         try {
-            const data = await fetch(
-                `https://graph.facebook.com/me?access_token=${t}&fields=id,name,picture.type(large)`
+            const data = await tracedFetch(
+                `https://graph.facebook.com/me?access_token=${t}&fields=id,name,picture.type(large)`,
+                null,
+                child
             );
 
             const result = await data.json();

@@ -4502,10 +4502,10 @@ expo-attestation-config-plugin@1.1.1:
   resolved "https://registry.yarnpkg.com/expo-attestation-config-plugin/-/expo-attestation-config-plugin-1.1.1.tgz#ac3b00bc61b85f996ce4ef1b3bd4adcc79e878c8"
   integrity sha512-7u2CSOJbcauPOP6t1xzssBjvaWe0S22RjWmIIxJulHis3gHhzFbmfz+U5XNWgEVc4zSG6Z1AyH4zgVRdR6yaEg==
 
-expo-attestation@1.3.7:
-  version "1.3.7"
-  resolved "https://registry.yarnpkg.com/expo-attestation/-/expo-attestation-1.3.7.tgz#3246e7f5e32db86c617251c81ad368cfd424cce3"
-  integrity sha512-z3FJ4a5JzMBH3MR+0EAx2FE3IbJ+XVlLIBlhIhwVfv/mTRWSaGiLQVBjLQV+fx7DugEs9GO76tvTbjhqAjeB8w==
+expo-attestation@1.3.8:
+  version "1.3.8"
+  resolved "https://registry.yarnpkg.com/expo-attestation/-/expo-attestation-1.3.8.tgz#06fe33ea2bc7424ff3e3a586e9bf1bb0cc1622e3"
+  integrity sha512-9+l/6/oVwUxBpyt1it6imzEAdSkgj8QTtk4YARH8vv27k7c05bws91LGYsdUbtlhzGuMb7VU8WCIAIxZN4hqRQ==
 
 expo-auth-session@~4.0.3:
   version "4.0.3"

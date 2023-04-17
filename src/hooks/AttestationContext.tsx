@@ -1,5 +1,5 @@
 import { Attestation, AttestationStatus } from "@api/attest";
-import { captureError, captureMsg, startChildSpan } from "@common";
+import { captureError, startChildSpan } from "@common";
 import { getNetworkStateAsync } from "expo-network";
 import React, {
     PropsWithChildren,
@@ -42,23 +42,14 @@ export const AttestationProvider = ({ children }: PropsWithChildren) => {
             const networkState = await getNetworkStateAsync();
             if (networkState.isInternetReachable) {
                 if (user && "sub" in user && accessToken) {
-                    const result = await Attestation.sendAttestation(
+                    const result = await Attestation.attestDevice(
                         user.sub,
                         accessToken
                     );
                     if (result === AttestationStatus.SUCCESS) {
-                        captureMsg("Attestation succeeded.", span);
                         setAttestStatus(result);
-                    } else if (result === AttestationStatus.NOT_AVAILABLE) {
-                        captureMsg("Attestation not available.", span);
-                    } else {
-                        captureMsg("Attestation failed.", span);
                     }
-                } else {
-                    captureMsg("User is not logged in.", span);
                 }
-            } else {
-                captureMsg("Network is unreachable.", span);
             }
         } catch (err) {
             captureError(err, span);

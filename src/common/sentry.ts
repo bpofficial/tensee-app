@@ -40,9 +40,9 @@ export const startChildSpan = (
 };
 
 export async function withSpan<T>(
-    ctx: ChildSpanOpts & { parent?: SentryTypes.Span },
+    ctx: ChildSpanOpts & { parent?: SentryTypes.Span; throw?: boolean },
     cb: (span: SentryTypes.Span) => T
-): Promise<Awaited<T>> {
+): Promise<Awaited<T> | null> {
     const span = startChildSpan(ctx, ctx?.parent);
     console.debug("Starting span: ", ctx.op);
     try {
@@ -52,8 +52,11 @@ export async function withSpan<T>(
     } catch (err) {
         captureError(err, span);
         span.finish();
-        throw err;
+        if (ctx.throw) {
+            throw err;
+        }
     }
+    return null;
 }
 
 export function captureError(

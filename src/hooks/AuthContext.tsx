@@ -86,7 +86,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
                         });
 
                         const userProfile = await auth0.auth.userInfo({
-                            token: credentials.accessToken,
+                            token: creds.accessToken,
                         });
 
                         setUser(userProfile);
@@ -96,7 +96,9 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
                 );
             });
 
-            storeCredentials(credentials);
+            if (credentials !== null) {
+                storeCredentials(credentials);
+            }
         } catch (error) {
             getDefinedError("auth0", error);
             throw new UnknownError();
