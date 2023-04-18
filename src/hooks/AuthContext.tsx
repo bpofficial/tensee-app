@@ -1,7 +1,9 @@
-import { IntermediateUserInfo } from "@api";
+import {
+    IntermediateUserInfo,
+    createAppState,
+    withNetworkActivity,
+} from "@api";
 import { auth0 } from "@api/auth/auth0";
-import { createAppState } from "@api/createAppState";
-import { withNetworkActivity } from "@api/withNetworkActivity";
 import { Config, Logger, withSpan } from "@common";
 import { UnknownError, getDefinedError } from "@errors";
 import React, {

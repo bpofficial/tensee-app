@@ -1,5 +1,5 @@
+import { tracedFetch } from "@api";
 import { api } from "@api/constants";
-import { tracedFetch } from "@api/fetch";
 import { withSpan } from "@common";
 import { Span } from "@sentry/types";
 

@@ -1,4 +1,4 @@
-import { tracedFetch } from "@api/fetch";
+import { tracedFetch } from "@api";
 import { Config, Logger, Scope, captureError, startChildSpan } from "@common";
 import { useActivity, useAuth, useBoolean, useColor } from "@hooks";
 import { useNavigation } from "@react-navigation/native";
@@ -56,7 +56,6 @@ export const SignInWithFacebook = ({ disabled = false }) => {
             const result = await data.json();
 
             if (result.id) {
-                console.log(result);
                 setUser({
                     socialProvider: "facebook",
                     socialAccessToken: t,

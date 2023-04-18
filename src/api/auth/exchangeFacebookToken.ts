@@ -1,4 +1,4 @@
-import { tracedFetch } from "@api/fetch";
+import { tracedFetch } from "@api";
 import { Config, startChildSpan, withSpan } from "@common";
 import { Credentials, UserInfo } from "react-native-auth0";
 import { auth0 } from "./auth0";

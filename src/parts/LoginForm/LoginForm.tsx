@@ -1,4 +1,4 @@
-import { withNetworkActivity } from "@api/withNetworkActivity";
+import { withNetworkActivity } from "@api";
 import { captureError, startChildSpan } from "@common";
 import {
     CandleButton,

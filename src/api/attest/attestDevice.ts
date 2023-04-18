@@ -1,8 +1,8 @@
-import { createAppState } from "@api/createAppState";
 import { startChildSpan, withSpan } from "@common";
 import { Span } from "@sentry/types";
 import { getOrCreateDeviceId } from "@utils";
 import * as Attest from "expo-attestation";
+import { createAppState } from "../utils";
 import { getChallenge } from "./getChallenge";
 import { submitAttestation } from "./sendAttestationData";
 import { AttestationStatus } from "./types";

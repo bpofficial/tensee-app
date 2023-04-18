@@ -1,9 +1,7 @@
-import { tracedFetch } from "@api/fetch";
 import { Config, captureError, startChildSpan, withSpan } from "@common";
 import { getSecureItem, setSecureItem } from "../../utils/secureStorage";
 import { api } from "../constants";
-import { createAppState } from "../createAppState";
-import { withNetworkActivity } from "../withNetworkActivity";
+import { createAppState, tracedFetch, withNetworkActivity } from "../utils";
 import { RefreshStatus } from "./types";
 
 // Returns boolean, if false then logout, if true then all is good

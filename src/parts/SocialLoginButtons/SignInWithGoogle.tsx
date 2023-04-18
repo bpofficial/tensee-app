@@ -1,4 +1,4 @@
-import { tracedFetch } from "@api/fetch";
+import { tracedFetch } from "@api";
 import { Logger, Scope, startChildSpan } from "@common";
 import { useActivity, useAuth, useBoolean, useColor } from "@hooks";
 import { useNavigation } from "@react-navigation/native";
