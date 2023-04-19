@@ -1,6 +1,7 @@
 import { useIsFocused, useNavigation } from "@react-navigation/native";
 import * as LocalAuthentication from "expo-local-authentication";
 import { useEffect } from "react";
+import { useBiometricState } from "./BiometricContext";
 import { useCredentialActions } from "./CredentialContext";
 import { usePinSettings } from "./PinAuthContext";
 
@@ -10,6 +11,7 @@ export function useAttemptBiometricLogin() {
     const { refreshAccessToken, isRefreshTokenExpired } =
         useCredentialActions();
     const { hasPinSet } = usePinSettings();
+    const { getHasUsedBiometrics } = useBiometricState();
 
     const navigateToPinEntryIfPossible = async () => {
         const isPinSet = await hasPinSet();
@@ -38,6 +40,11 @@ export function useAttemptBiometricLogin() {
             // If there's no supported biometrics, navigate to the pin entry screen
             return navigateToPinEntryIfPossible();
         }
+
+        // TODO: Figure out what to do here, and what the flow is for setting up biometric
+        // login. i.e. how to direct or prompt the user to allow biometrics.
+        const hasUsedBiometricsBefore = await getHasUsedBiometrics();
+        if (!hasUsedBiometricsBefore) return;
 
         const result = await LocalAuthentication.authenticateAsync({
             promptMessage: "Authenticate with biometrics",

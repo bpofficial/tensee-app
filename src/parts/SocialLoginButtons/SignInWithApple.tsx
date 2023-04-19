@@ -1,9 +1,8 @@
-import { Scope, captureError, startChildSpan } from "@common";
-import { useActivity, useAuth, useColor } from "@hooks";
-import { useNavigation } from "@react-navigation/native";
+import { useActivity, useColor } from "@hooks";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useOnLoginComplete } from "./onLoginComplete";
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const appleBlackIcon = require("../../../assets/branding/apple-logo-black.png");
@@ -12,9 +11,8 @@ const appleBlackIcon = require("../../../assets/branding/apple-logo-black.png");
 
 export const SignInWithApple = ({ disabled = false }) => {
     const { setActive } = useActivity();
-    const { setUser } = useAuth();
-    const { navigate } = useNavigation();
     const [isAppleAuthAvailable, setIsAppleAuthAvailable] = useState(false);
+    const onLoginComplete = useOnLoginComplete();
 
     useEffect(() => {
         (async () => {
@@ -24,12 +22,6 @@ export const SignInWithApple = ({ disabled = false }) => {
     }, []);
 
     const handleAppleLogin = async () => {
-        setActive(true);
-        const span = startChildSpan({
-            name: "Continue w/ Apple",
-            op: "submit_social_login",
-        });
-
         try {
             const credential = await AppleAuthentication.signInAsync({
                 requestedScopes: [
@@ -37,29 +29,9 @@ export const SignInWithApple = ({ disabled = false }) => {
                     AppleAuthentication.AppleAuthenticationScope.EMAIL,
                 ],
             });
-
-            if (credential) {
-                Scope.setSpan(span);
-                setUser({
-                    socialProvider: "apple",
-                    socialAccessToken: credential.authorizationCode,
-                    firstName: credential.fullName?.givenName ?? "",
-                    email: credential.email,
-                    id: credential.user,
-                });
-                navigate("App", {
-                    screen: "Home",
-                    params: { fromLogin: true },
-                });
-                span.finish();
-            }
-        } catch (err: any) {
-            captureError(err, span);
-            if (err.code === "ERR_CANCELED") {
-                // console.log("Apple login was canceled");
-            } else {
-                // console.error("Apple login error:", err);
-            }
+            onLoginComplete(credential, "apple");
+        } catch (err) {
+            //
         }
         setActive(false);
     };

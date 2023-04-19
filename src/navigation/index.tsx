@@ -6,7 +6,7 @@
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
-import { App, Auth } from "@screens";
+import { App, Auth, Loading, Onboarding } from "@screens";
 import { useRef } from "react";
 import * as Sentry from "sentry-expo";
 import { RootStackParamList } from "types";
@@ -30,8 +30,18 @@ function RootNavigator() {
                 options={{ headerShown: false, statusBarTranslucent: true }}
             />
             <Stack.Screen
+                name="Onboarding"
+                component={Onboarding.Navigator}
+                options={{ headerShown: false, statusBarTranslucent: true }}
+            />
+            <Stack.Screen
                 name="App"
                 component={App.Navigator}
+                options={{ headerShown: false, statusBarTranslucent: true }}
+            />
+            <Stack.Screen
+                name="Loading"
+                component={Loading.Screen}
                 options={{ headerShown: false, statusBarTranslucent: true }}
             />
         </Stack.Navigator>

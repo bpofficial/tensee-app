@@ -1,10 +1,4 @@
-import {
-    IntermediateUserInfo,
-    RefreshStatus,
-    TokenActions,
-    TokenExchange,
-} from "@api";
-import { auth0 } from "@api/auth/auth0";
+import { API, RefreshStatus } from "@api";
 import { api } from "@api/constants";
 import { Config, withSpan } from "@common";
 import { getSecureItem, setSecureItem } from "@utils";
@@ -15,7 +9,7 @@ import React, {
     useState,
 } from "react";
 import { InteractionManager } from "react-native";
-import { Credentials, UserInfo } from "react-native-auth0";
+import { Credentials } from "react-native-auth0";
 import { useBoolean } from "./useBoolean";
 
 interface ICredentialContext {
@@ -26,7 +20,6 @@ interface ICredentialContext {
     storeCredentials(credentials: Credentials): void;
     clearCredentials(): Promise<void>;
     refreshAccessToken(): Promise<RefreshStatus>;
-    exchangeSocialTokens(user: IntermediateUserInfo): Promise<UserInfo | null>;
 }
 
 const CredentialContext = createContext<ICredentialContext>({
@@ -46,9 +39,6 @@ const CredentialContext = createContext<ICredentialContext>({
     },
     refreshAccessToken: async () => {
         return RefreshStatus.ALL_ACTIVE;
-    },
-    exchangeSocialTokens: async () => {
-        return null;
     },
 });
 
@@ -158,7 +148,7 @@ export const CredentialProvider = ({ children }: PropsWithChildren) => {
 
     const refreshAccessToken = async () => {
         loading.on();
-        const result = await TokenActions.refreshAccessToken();
+        const result = await API.Auth.TokenActions.refreshAccessToken();
         if (result === RefreshStatus.ALL_ACTIVE) {
             // Update the access token here...
             await withSpan(
@@ -182,49 +172,6 @@ export const CredentialProvider = ({ children }: PropsWithChildren) => {
         return result;
     };
 
-    const exchangeSocialTokens = async (user: IntermediateUserInfo) => {
-        if (user.socialAccessToken) {
-            loading.on();
-            let credentials: Credentials | null = null;
-            if (user.socialProvider === "facebook") {
-                credentials = await TokenExchange.exchangeFacebookAccessToken(
-                    user.socialAccessToken,
-                    user
-                );
-            } else if (user.socialProvider === "apple") {
-                credentials =
-                    await TokenExchange.exchangeAppleAuthorizationCode(
-                        user.socialAccessToken
-                    );
-            } else if (user.socialProvider === "google") {
-                //
-            }
-
-            return withSpan(
-                {
-                    op: "get_social_info",
-                    name: "Get user info from social access token",
-                    description: `After exchanging the social token for an Auth0 token, 
-                                  get the user info associated with it.`,
-                },
-                async () => {
-                    if (credentials !== null) {
-                        const userProfile = await auth0.auth.userInfo({
-                            token: credentials.accessToken,
-                        });
-
-                        storeCredentials(credentials);
-                        loading.off();
-                        return userProfile;
-                    }
-                    loading.off();
-                    return null;
-                }
-            );
-        }
-        return null;
-    };
-
     return (
         <CredentialContext.Provider
             value={{
@@ -234,7 +181,6 @@ export const CredentialProvider = ({ children }: PropsWithChildren) => {
                 isAccessTokenExpired: () => isTokenExpired("access"),
                 isRefreshTokenExpired: () => isTokenExpired("refresh"),
                 refreshAccessToken,
-                exchangeSocialTokens,
                 isLoading,
             }}
         >

@@ -1,10 +1,11 @@
 import {
+    API,
     IntermediateUserInfo,
     createAppState,
     withNetworkActivity,
 } from "@api";
 import { auth0 } from "@api/auth/auth0";
-import { Config, Logger, withSpan } from "@common";
+import { Config, withSpan } from "@common";
 import { UnknownError, getDefinedError } from "@errors";
 import React, {
     PropsWithChildren,
@@ -14,9 +15,10 @@ import React, {
     useState,
 } from "react";
 import { InteractionManager } from "react-native";
-import { UserInfo } from "react-native-auth0";
+import { Credentials, UserInfo } from "react-native-auth0";
 import { useCredentialActions } from "./CredentialContext";
 import { usePinSettings } from "./PinAuthContext";
+import { NavigableTaskResult } from "./TaskContext";
 
 interface IAuthContext {
     user: UserInfo | IntermediateUserInfo | null;
@@ -24,6 +26,9 @@ interface IAuthContext {
     login(email: string, password: string): Promise<void>;
     register(name: string, email: string, password: string): Promise<void>;
     logout(): Promise<void>;
+    exchangeSocialTokens(
+        user: IntermediateUserInfo
+    ): Promise<NavigableTaskResult | null>;
 }
 
 const AuthContext = createContext<IAuthContext>({
@@ -40,6 +45,9 @@ const AuthContext = createContext<IAuthContext>({
     logout: async () => {
         //
     },
+    exchangeSocialTokens: async () => {
+        return null;
+    },
 });
 
 /**
@@ -47,13 +55,8 @@ const AuthContext = createContext<IAuthContext>({
  * https://auth0.com/docs/troubleshoot/general-usage-and-operations-best-practices#avoid-pinning-or-fingerprinting-tls-certificates-for-auth0-endpoints
  */
 export const AuthProvider = ({ children }: PropsWithChildren) => {
-    // const [attestationStatus, attestationToken] = useAttestation();
-    const {
-        storeCredentials,
-        exchangeSocialTokens,
-        accessToken,
-        clearCredentials,
-    } = useCredentialActions();
+    const { storeCredentials, accessToken, clearCredentials } =
+        useCredentialActions();
     const { clearPin } = usePinSettings();
 
     const [user, setUser] = useState<UserInfo | IntermediateUserInfo | null>(
@@ -75,7 +78,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
             const credentials = await withNetworkActivity(async () => {
                 return withSpan(
                     { op: "auth_login", name: "Login with Credentials" },
-                    async () => {
+                    async (span) => {
                         const creds = await auth0.auth.passwordRealm({
                             username: email,
                             password: password,
@@ -90,6 +93,12 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
                         const userProfile = await auth0.auth.userInfo({
                             token: creds.accessToken,
                         });
+
+                        await API.Users.notifyLogin(
+                            userProfile.sub,
+                            creds.accessToken,
+                            span
+                        );
 
                         setUser(userProfile);
 
@@ -138,17 +147,80 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
         }
     };
 
-    useEffect(() => {
-        if (user && "socialProvider" in user) {
-            exchangeSocialTokens(user)
-                .then((userProfile) => {
-                    if (userProfile !== null) {
-                        setUser(userProfile);
+    const exchangeSocialTokens = async (
+        user: IntermediateUserInfo
+    ): Promise<NavigableTaskResult | null> => {
+        try {
+            console.log(user);
+            if (user.socialAccessToken) {
+                let credentials: Credentials | null = null;
+                if (user.socialProvider === "facebook") {
+                    credentials =
+                        await API.Auth.TokenExchange.exchangeFacebookAccessToken(
+                            user.socialAccessToken,
+                            user
+                        );
+                } else if (user.socialProvider === "apple") {
+                    credentials =
+                        await API.Auth.TokenExchange.exchangeAppleAuthorizationCode(
+                            user.socialAccessToken
+                        );
+                } else if (user.socialProvider === "google") {
+                    credentials =
+                        await API.Auth.TokenExchange.exchangeGoogleAccessToken(
+                            user.socialAccessToken
+                        );
+                }
+
+                const result = await withSpan(
+                    {
+                        op: "get_social_info",
+                        name: "Get user info from social access token",
+                        description: `After exchanging the social token for an Auth0 token, 
+                                  get the user info associated with it.`,
+                    },
+                    async (span): Promise<[UserInfo, number | null] | null> => {
+                        if (credentials !== null) {
+                            const userProfile = await auth0.auth.userInfo({
+                                token: credentials.accessToken,
+                            });
+
+                            // In the context of social sign-in/register
+                            // the loginCount is useful as it allows us
+                            // to determine if this is a new user registering
+                            // directly from the login screen.
+                            const loginCount = await API.Users.notifyLogin(
+                                userProfile.sub,
+                                credentials.accessToken,
+                                span
+                            );
+
+                            storeCredentials(credentials);
+                            setUser(userProfile);
+                            return [userProfile, loginCount];
+                        }
+                        return null;
                     }
-                })
-                .catch(Logger.captureException);
+                );
+
+                if (result !== null) {
+                    const [, loginCount] = result;
+                    if (loginCount === 0) {
+                        // Return this so that the task controller can
+                        // redirect properly from the loading screen.
+                        return {
+                            callback: {
+                                screen: "Onboarding",
+                            },
+                        } as NavigableTaskResult;
+                    }
+                }
+            }
+        } catch (err) {
+            console.log(err);
         }
-    }, [user]);
+        return null;
+    };
 
     useEffect(() => {
         if (accessToken !== null) {
@@ -176,6 +248,7 @@ export const AuthProvider = ({ children }: PropsWithChildren) => {
                 login,
                 register,
                 logout,
+                exchangeSocialTokens,
             }}
         >
             {children}

@@ -49,10 +49,8 @@ export const LoginForm: React.FC<FormProps> = ({
                 await login(values.email, values.password);
 
                 span.finish();
-                navigate("App", {
-                    screen: "Home",
-                    params: { fromLogin: true },
-                });
+
+                navigate("App");
             } catch (err: any) {
                 captureError(err, span);
                 actions.setFormError(

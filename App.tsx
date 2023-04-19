@@ -3,8 +3,10 @@ import {
     AppStateProvider,
     AttestationProvider,
     AuthProvider,
+    BiometricProvider,
     CredentialProvider,
     PinAuthProvider,
+    TaskProvider,
 } from "@hooks";
 import { Navigation } from "@navigation";
 import {
@@ -50,21 +52,25 @@ export default function AppRoot() {
     return (
         <Sentry.Native.ErrorBoundary>
             <Sentry.Native.TouchEventBoundary>
-                <AppStateProvider>
-                    <PinAuthProvider>
-                        <CredentialProvider>
-                            <AuthProvider>
-                                <AttestationProvider>
-                                    <ThemeProvider theme={theme}>
-                                        <SafeAreaProvider>
-                                            <App />
-                                        </SafeAreaProvider>
-                                    </ThemeProvider>
-                                </AttestationProvider>
-                            </AuthProvider>
-                        </CredentialProvider>
-                    </PinAuthProvider>
-                </AppStateProvider>
+                <ThemeProvider theme={theme}>
+                    <TaskProvider>
+                        <AppStateProvider>
+                            <BiometricProvider>
+                                <PinAuthProvider>
+                                    <CredentialProvider>
+                                        <AuthProvider>
+                                            <AttestationProvider>
+                                                <SafeAreaProvider>
+                                                    <App />
+                                                </SafeAreaProvider>
+                                            </AttestationProvider>
+                                        </AuthProvider>
+                                    </CredentialProvider>
+                                </PinAuthProvider>
+                            </BiometricProvider>
+                        </AppStateProvider>
+                    </TaskProvider>
+                </ThemeProvider>
             </Sentry.Native.TouchEventBoundary>
         </Sentry.Native.ErrorBoundary>
     );

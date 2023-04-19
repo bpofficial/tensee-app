@@ -18,10 +18,6 @@ declare global {
     }
 }
 
-export type AppTabParamList = {
-    Home: { fromLogin?: boolean };
-};
-
 export type AuthStackParamList = {
     Login: undefined;
     Register: undefined;
@@ -30,13 +26,46 @@ export type AuthStackParamList = {
     PinEntry: undefined;
 };
 
-export type RootStackParamList = {
-    App: NavigatorScreenParams<AppTabParamList> | undefined;
-    Auth: NavigatorScreenParams<AuthStackParamList> | undefined;
+export type OnboardingStackParamList = {
+    SetupAccountType: undefined;
+    SetupPrimaryDetails: undefined;
+    SetupPin: undefined;
+    SetupBiometrics: undefined;
+    SetupNotifications: undefined;
 };
 
-export type AppStackScreenProps<Screen extends keyof RootStackParamList> =
-    NativeStackScreenProps<RootStackParamList, Screen>;
+export type AppTabParamList = {
+    Home: undefined;
+    Onboarding: undefined;
+};
+
+export type LoadingScreenParamList = {
+    Loading: {
+        message: string;
+
+        // We pass in the exact arguments for 'navigate' function
+        callback: {
+            screen: string;
+            params?: Record<string, any>;
+        };
+
+        // Go here if the task fails...
+        failCallback?: {
+            screen: string;
+            params?: Record<string, any>;
+        };
+
+        task?: string;
+        timer?: number;
+    };
+};
+
+export type RootStackParamList = {
+    Auth: NavigatorScreenParams<AuthStackParamList> | undefined;
+    Onboarding: NavigatorScreenParams<OnboardingStackParamList> | undefined;
+    App: NavigatorScreenParams<AppTabParamList> | undefined;
+    Loading: NavigatorScreenParams<LoadingScreenParamList>;
+};
 
 export type AppTabScreenProps<Screen extends keyof AppTabParamList> =
     CompositeScreenProps<

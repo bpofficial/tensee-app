@@ -1,4 +1,4 @@
-import { Attestation, AttestationStatus } from "@api/attest";
+import { API, AttestationStatus } from "@api";
 import { captureError, startChildSpan } from "@common";
 import { getNetworkStateAsync } from "expo-network";
 import React, {
@@ -42,7 +42,7 @@ export const AttestationProvider = ({ children }: PropsWithChildren) => {
             const networkState = await getNetworkStateAsync();
             if (networkState.isInternetReachable) {
                 if (user && "sub" in user && accessToken) {
-                    const result = await Attestation.attestDevice(
+                    const result = await API.Attestation.attestDevice(
                         user.sub,
                         accessToken
                     );

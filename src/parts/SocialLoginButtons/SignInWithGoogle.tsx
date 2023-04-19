@@ -1,12 +1,11 @@
 import { tracedFetch } from "@api";
-import { Logger, Scope, startChildSpan } from "@common";
-import { useActivity, useAuth, useBoolean, useColor } from "@hooks";
-import { useNavigation } from "@react-navigation/native";
-import { Span } from "@sentry/types";
+import { captureError } from "@common";
+import { useActivity, useColor } from "@hooks";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { useOnLoginComplete } from "./onLoginComplete";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -14,11 +13,8 @@ WebBrowser.maybeCompleteAuthSession();
 const googleIcon = require("../../../assets/branding/google-icon.png");
 
 export const SignInWithGoogle = ({ disabled = false }) => {
-    const [span, setSpan] = useState<Span | null>(null);
-    const { navigate } = useNavigation();
-    const { setUser } = useAuth();
     const { setActive } = useActivity();
-    const [isLoading, loading] = useBoolean();
+    const onLoginComplete = useOnLoginComplete();
 
     const [request, response, promptAsync] = Google.useAuthRequest({
         androidClientId:
@@ -29,12 +25,6 @@ export const SignInWithGoogle = ({ disabled = false }) => {
 
     const onPrompt = () => {
         setActive(true);
-        setSpan(
-            startChildSpan({
-                name: "Continue w/ Google",
-                op: "submit_social_login",
-            })
-        );
         promptAsync();
     };
 
@@ -42,46 +32,14 @@ export const SignInWithGoogle = ({ disabled = false }) => {
         try {
             const data = await tracedFetch(
                 "https://www.googleapis.com/userinfo/v2/me",
-                {
-                    headers: { Authorization: `Bearer ${t}` },
-                },
-                span
+                { headers: { Authorization: `Bearer ${t}` } }
             );
 
-            const result = await data.json();
-            Scope.setSpan(span!);
-            if (result.id) {
-                setUser({
-                    socialProvider: "google",
-                    socialAccessToken: t,
-                    firstName: result.name ?? result.given_name,
-                    email: result.email,
-                    id: result.id,
-                });
-
-                navigate("App", {
-                    screen: "Home",
-                    params: { fromLogin: true },
-                });
-            } else {
-                Logger.addBreadcrumb({
-                    type: "info",
-                    level: "info",
-                    message: "Google Response",
-                    data: result,
-                });
-                throw new Error("Google info has no ID?");
-            }
-
-            setTimeout(() => {
-                setActive(false);
-                loading.off();
-            }, 300);
+            const userInfo = await data.json();
+            onLoginComplete({ ...userInfo, token: t }, "google");
         } catch (error) {
-            Logger.captureException(error);
-            console.log(error);
+            captureError(error);
             setActive(false);
-            loading.off();
         }
     };
 
@@ -90,14 +48,10 @@ export const SignInWithGoogle = ({ disabled = false }) => {
             const accessToken = response.authentication?.accessToken ?? null;
             if (accessToken) {
                 getUserInfo(accessToken);
-
-                span?.finish?.();
                 return;
             }
         }
         setActive(false);
-        loading.off();
-        span?.finish?.();
     }, [response]);
 
     const color = useColor("black", "black");
