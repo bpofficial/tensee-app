@@ -1,11 +1,16 @@
 import * as Sentry from "@sentry/react-native";
 import { Span } from "@sentry/types";
+import { Config } from "src/config";
 
 export async function tracedFetch(
-    url: string,
+    url: `/v1${string}` | `https://${string}`,
     options?: RequestInit | null,
     currentSpan?: Span | null
 ) {
+    if (url.startsWith("/v1")) {
+        url = (Config.api.apiUrl + url) as `https://${string}`;
+    }
+
     const activeSpan =
         currentSpan || Sentry.getCurrentHub().getScope()?.getSpan();
 

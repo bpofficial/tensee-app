@@ -1,6 +1,7 @@
 import { tracedFetch } from "@api";
-import { Config, startChildSpan, withSpan } from "@common";
+import { startChildSpan, withSpan } from "@common";
 import { Credentials, UserInfo } from "react-native-auth0";
+import { Config } from "src/config";
 import { auth0 } from "./auth0";
 import { IntermediateUserInfo } from "./types";
 
@@ -26,8 +27,7 @@ export const exchangeFacebookAccessToken = async (
                 params += `&client_id=${Config.facebook.clientId}`;
                 params += `&fb_exchange_token=${facebookAccessToken}`;
                 const subjectTokenResponse = await tracedFetch(
-                    "https://graph.facebook.com/v5.0/oauth/access_token?" +
-                        params,
+                    `https://graph.facebook.com/v5.0/oauth/access_token?${params}`,
                     null,
                     thisSpan
                 );

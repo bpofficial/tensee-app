@@ -1,5 +1,4 @@
 import { tracedFetch } from "@api";
-import { api } from "@api/constants";
 import { withSpan } from "@common";
 import { Span } from "@sentry/types";
 
@@ -21,7 +20,7 @@ export async function submitAttestation(
             },
             (span) =>
                 tracedFetch(
-                    api.apiUrl + "/v1/attest",
+                    "/v1/attest",
                     {
                         method: "POST",
                         body: JSON.stringify({

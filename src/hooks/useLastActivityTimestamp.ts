@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useState } from "react";
-import { useAppState } from "./AppStateContext";
+import { useAppState } from "./context";
 
 export function useLastActivityTimestamp(): [number, (t: number) => void] {
     const [timestamp, setTimestamp] = useState<number>(-1);

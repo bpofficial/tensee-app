@@ -7,7 +7,7 @@ import {
     useState,
 } from "react";
 import { AppState, AppStateStatus } from "react-native";
-import { usePrevious } from "./usePrevious";
+import { usePrevious } from "../usePrevious";
 
 interface IAppState {
     appState: AppStateStatus;

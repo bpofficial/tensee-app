@@ -1,5 +1,4 @@
 import { tracedFetch } from "@api";
-import { api } from "@api/constants";
 import { withSpan } from "@common";
 import { Span } from "@sentry/types";
 
@@ -20,8 +19,7 @@ export async function getChallenge(
             },
             (span) =>
                 tracedFetch(
-                    api.apiUrl +
-                        `/v1/attest/challenge?state=${state}&device=${device}`,
+                    `/v1/attest/challenge?state=${state}&device=${device}`,
                     {
                         headers: {
                             Authorization: `Bearer ${token}`,

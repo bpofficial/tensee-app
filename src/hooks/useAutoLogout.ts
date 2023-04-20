@@ -1,9 +1,10 @@
-import { Config, Logger } from "@common";
+import { Logger } from "@common";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect } from "react";
-import { useAppState } from "./AppStateContext";
-import { useAuth } from "./AuthContext";
-import { useCredentialActions } from "./CredentialContext";
+import { Config } from "src/config";
+import { useAppState } from "./context/AppStateContext";
+import { useAuth } from "./context/AuthContext";
+import { useCredentialActions } from "./context/CredentialContext";
 import { useLastActivityTimestamp } from "./useLastActivityTimestamp";
 
 export function useAutoLogout() {

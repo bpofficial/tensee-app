@@ -14,14 +14,12 @@ export const linking: LinkingOptions<RootStackParamList> = {
         screens: {
             Auth: {
                 screens: {
-                    SocialCallback: "auth/callback",
                     Login: "auth/login",
                     Register: "auth/register",
                     ForgotPassword: "auth/forgotpassword",
                     ForgotPasswordReset: "auth/resetpassword",
                 },
             },
-            NotFound: "*",
         },
     },
 };

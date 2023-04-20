@@ -1,6 +1,8 @@
+import { IntermediateUserInfo, tracedFetch } from "@api";
 import { captureError } from "@common";
 import { useActivity, useAuth, useTaskContext } from "@hooks";
 import { useNavigation } from "@react-navigation/native";
+import { AppleAuthenticationCredential } from "expo-apple-authentication";
 
 export function useOnLoginComplete() {
     const { setActive } = useActivity();
@@ -8,29 +10,33 @@ export function useOnLoginComplete() {
     const { navigate } = useNavigation();
     const { addTask } = useTaskContext();
 
-    function handler(
-        credentials: any,
+    async function handler(
+        credential: string | AppleAuthenticationCredential,
         provider: "apple" | "google" | "facebook"
     ) {
         try {
-            if (credentials) {
-                let exchange;
+            if (credential) {
+                let exchange: IntermediateUserInfo;
                 switch (provider) {
                     case "apple":
-                        exchange = appleCredsToExchange(credentials);
+                        exchange = appleCredsToExchange(credential as any);
                         break;
                     case "facebook":
-                        exchange = facebookCredsToExchange(credentials);
+                        exchange = await facebookCredsToExchange(
+                            credential as string
+                        );
                         break;
                     case "google":
-                        exchange = googleCredsToExchange(credentials);
+                        exchange = await googleCredsToExchange(
+                            credential as string
+                        );
                         break;
                 }
 
                 if (exchange) {
                     addTask(
                         "exchange_social_token",
-                        exchangeSocialTokens(exchange as any)
+                        exchangeSocialTokens(exchange)
                     );
 
                     navigate("Loading", {
@@ -54,32 +60,54 @@ export function useOnLoginComplete() {
     return handler;
 }
 
-function facebookCredsToExchange(creds: any) {
+async function facebookCredsToExchange(
+    token: string
+): Promise<IntermediateUserInfo> {
+    const data = await tracedFetch(
+        `https://graph.facebook.com/me?access_token=${token}&fields=id,name,picture.type(large)`,
+        null
+    );
+
+    const userInfo = await data.json();
     return {
         socialProvider: "facebook",
-        socialAccessToken: creds.token,
-        firstName: creds.name,
+        socialAccessToken: token,
+        firstName: userInfo.name,
         email: null,
-        id: creds.id,
-    };
+        id: userInfo.id,
+    } as const;
 }
 
-function googleCredsToExchange(creds: any) {
+async function googleCredsToExchange(
+    token: string
+): Promise<IntermediateUserInfo> {
+    const data = await tracedFetch(
+        "https://www.googleapis.com/userinfo/v2/me",
+        {
+            headers: {
+                Authorization: `Bearer ${token}`,
+            },
+        }
+    );
+
+    const userInfo = await data.json();
     return {
         socialProvider: "google",
-        socialAccessToken: creds.token,
-        firstName: creds.name ?? creds.given_name,
-        email: creds.email,
-        id: creds.id,
-    };
+        socialAccessToken: token,
+        firstName: userInfo.name ?? userInfo.given_name,
+        email: userInfo.email,
+        id: userInfo.id,
+    } as const;
 }
 
-function appleCredsToExchange(creds: any) {
+function appleCredsToExchange(
+    creds: AppleAuthenticationCredential
+): IntermediateUserInfo {
     return {
         socialProvider: "apple",
         socialAccessToken: creds.authorizationCode,
         firstName: creds.fullName?.givenName ?? "",
         email: creds.email,
         id: creds.user,
-    };
+    } as const;
 }

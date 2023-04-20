@@ -1,10 +1,10 @@
-import { tracedFetch } from "@api";
-import { Config, captureError } from "@common";
-import { useActivity, useColor } from "@hooks";
+import { captureError } from "@common";
+import { useColor } from "@hooks";
 import * as Facebook from "expo-auth-session/providers/facebook";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Config } from "src/config";
 import { useOnLoginComplete } from "./onLoginComplete";
 
 WebBrowser.maybeCompleteAuthSession();
@@ -15,7 +15,6 @@ const facebookColorIcon = require("../../../assets/branding/facebook-logo-color.
 // const facebookWhiteIcon = require("../../../assets/branding/facebook-logo-white.png");
 
 export const SignInWithFacebook = ({ disabled = false }) => {
-    const { setActive } = useActivity();
     const onLoginComplete = useOnLoginComplete();
 
     const [request, response, promptAsync] = Facebook.useAuthRequest({
@@ -23,35 +22,17 @@ export const SignInWithFacebook = ({ disabled = false }) => {
         scopes: ["public_profile"],
     });
 
-    const onPrompt = () => {
-        setActive(true);
-        promptAsync();
-    };
-
-    const getUserInfo = async (t: string) => {
-        try {
-            const data = await tracedFetch(
-                `https://graph.facebook.com/me?access_token=${t}&fields=id,name,picture.type(large)`,
-                null
-            );
-
-            const userInfo = await data.json();
-            onLoginComplete({ ...userInfo, token: t }, "facebook");
-        } catch (error) {
-            captureError(error);
-            setActive(false);
-        }
-    };
-
     useEffect(() => {
         if (response?.type === "success") {
             const accessToken = response.authentication?.accessToken ?? null;
             if (accessToken) {
-                getUserInfo(accessToken);
-                return;
+                try {
+                    onLoginComplete(accessToken, "facebook");
+                } catch (error) {
+                    captureError(error);
+                }
             }
         }
-        setActive(false);
     }, [response]);
 
     const color = useColor("black", "black");
@@ -61,7 +42,7 @@ export const SignInWithFacebook = ({ disabled = false }) => {
     return (
         <TouchableOpacity
             style={[styles.buttonContainer, { backgroundColor }]}
-            onPress={onPrompt}
+            onPress={() => promptAsync()}
             activeOpacity={0.65}
             disabled={!request || disabled}
         >

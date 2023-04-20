@@ -1,4 +1,3 @@
-import { api } from "@api/constants";
 import { tracedFetch } from "@api/utils";
 import { withSpan } from "@common";
 import { Span } from "@sentry/types";
@@ -18,7 +17,7 @@ export async function notifyLogin(
             },
             (span) =>
                 tracedFetch(
-                    api.apiUrl + `/v1/users/login`,
+                    `/v1/users/login`,
                     {
                         method: "POST",
                         body: JSON.stringify({

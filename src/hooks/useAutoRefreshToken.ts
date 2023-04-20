@@ -3,9 +3,7 @@ import { Logger } from "@common";
 import { useNavigation } from "@react-navigation/native";
 import { useEffect } from "react";
 import { InteractionManager } from "react-native";
-import { useAppState } from "./AppStateContext";
-import { useAuth } from "./AuthContext";
-import { useCredentialActions } from "./CredentialContext";
+import { useAppState, useAuth, useCredentialActions } from "./context";
 
 export function useAutoRefreshToken() {
     const { user } = useAuth();

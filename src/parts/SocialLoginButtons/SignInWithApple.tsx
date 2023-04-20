@@ -1,4 +1,4 @@
-import { useActivity, useColor } from "@hooks";
+import { useColor } from "@hooks";
 import * as AppleAuthentication from "expo-apple-authentication";
 import { useEffect, useState } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
@@ -10,7 +10,6 @@ const appleBlackIcon = require("../../../assets/branding/apple-logo-black.png");
 // const appleWhiteIcon = require("../../../assets/branding/apple-logo-white.png");
 
 export const SignInWithApple = ({ disabled = false }) => {
-    const { setActive } = useActivity();
     const [isAppleAuthAvailable, setIsAppleAuthAvailable] = useState(false);
     const onLoginComplete = useOnLoginComplete();
 
@@ -31,9 +30,8 @@ export const SignInWithApple = ({ disabled = false }) => {
             });
             onLoginComplete(credential, "apple");
         } catch (err) {
-            //
+            console.log(err);
         }
-        setActive(false);
     };
 
     const color = useColor("black", "black");

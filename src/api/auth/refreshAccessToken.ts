@@ -1,6 +1,6 @@
-import { Config, captureError, startChildSpan, withSpan } from "@common";
+import { captureError, startChildSpan, withSpan } from "@common";
+import { Config } from "src/config";
 import { getSecureItem, setSecureItem } from "../../utils/secureStorage";
-import { api } from "../constants";
 import { createAppState, tracedFetch, withNetworkActivity } from "../utils";
 import { RefreshStatus } from "./types";
 
@@ -18,9 +18,9 @@ export async function refreshAccessToken(): Promise<RefreshStatus> {
 
         const items = await withSpan({ op: "secure_read", parent: span }, () =>
             Promise.allSettled([
-                getSecureItem(api.secureStorageKey + "_refreshToken"),
-                getSecureItem(api.secureStorageKey + "_rtExpiresAt"), // refresh token expiry
-                getSecureItem(api.secureStorageKey + "_atExpiresAt"), // access token expiry
+                getSecureItem(Config.auth0.secureStorageKey + "_refreshToken"),
+                getSecureItem(Config.auth0.secureStorageKey + "_rtExpiresAt"), // refresh token expiry
+                getSecureItem(Config.auth0.secureStorageKey + "_atExpiresAt"), // access token expiry
             ])
         );
 
@@ -108,11 +108,11 @@ export async function refreshAccessToken(): Promise<RefreshStatus> {
                 await withSpan({ op: "secure_write", parent: span }, () =>
                     Promise.all([
                         setSecureItem(
-                            api.secureStorageKey + "_accessToken",
+                            Config.auth0.secureStorageKey + "_accessToken",
                             data.access_token
                         ),
                         setSecureItem(
-                            api.secureStorageKey + "_atExpiresAt",
+                            Config.auth0.secureStorageKey + "_atExpiresAt",
                             accessTokenExpiry
                         ),
                     ])

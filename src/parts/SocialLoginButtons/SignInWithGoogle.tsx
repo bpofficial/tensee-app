@@ -1,6 +1,5 @@
-import { tracedFetch } from "@api";
 import { captureError } from "@common";
-import { useActivity, useColor } from "@hooks";
+import { useColor } from "@hooks";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import React, { useEffect } from "react";
@@ -13,7 +12,6 @@ WebBrowser.maybeCompleteAuthSession();
 const googleIcon = require("../../../assets/branding/google-icon.png");
 
 export const SignInWithGoogle = ({ disabled = false }) => {
-    const { setActive } = useActivity();
     const onLoginComplete = useOnLoginComplete();
 
     const [request, response, promptAsync] = Google.useAuthRequest({
@@ -23,35 +21,17 @@ export const SignInWithGoogle = ({ disabled = false }) => {
             "635247457778-6hk52aj9s8vv1u880n7b481oj4nkbke9.apps.googleusercontent.com",
     });
 
-    const onPrompt = () => {
-        setActive(true);
-        promptAsync();
-    };
-
-    const getUserInfo = async (t: string) => {
-        try {
-            const data = await tracedFetch(
-                "https://www.googleapis.com/userinfo/v2/me",
-                { headers: { Authorization: `Bearer ${t}` } }
-            );
-
-            const userInfo = await data.json();
-            onLoginComplete({ ...userInfo, token: t }, "google");
-        } catch (error) {
-            captureError(error);
-            setActive(false);
-        }
-    };
-
     useEffect(() => {
         if (response?.type === "success") {
             const accessToken = response.authentication?.accessToken ?? null;
             if (accessToken) {
-                getUserInfo(accessToken);
-                return;
+                try {
+                    onLoginComplete(accessToken, "google");
+                } catch (error) {
+                    captureError(error);
+                }
             }
         }
-        setActive(false);
     }, [response]);
 
     const color = useColor("black", "black");
@@ -62,7 +42,7 @@ export const SignInWithGoogle = ({ disabled = false }) => {
     return (
         <TouchableOpacity
             style={[styles.buttonContainer, { backgroundColor }]}
-            onPress={onPrompt}
+            onPress={() => promptAsync()}
             disabled={!request || disabled}
         >
             <View style={styles.centeredContainer}>
