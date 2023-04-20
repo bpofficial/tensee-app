@@ -1,10 +1,10 @@
 import { captureError } from "@common";
 import { useColor } from "@hooks";
+import { Config } from "config";
 import * as Facebook from "expo-auth-session/providers/facebook";
 import * as WebBrowser from "expo-web-browser";
 import { useEffect } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
-import { Config } from "src/config";
 import { useOnLoginComplete } from "./onLoginComplete";
 
 WebBrowser.maybeCompleteAuthSession();

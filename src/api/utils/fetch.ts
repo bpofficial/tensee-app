@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/react-native";
 import { Span } from "@sentry/types";
-import { Config } from "src/config";
+import { Config } from "config";
 
 export async function tracedFetch(
     url: `/v1${string}` | `https://${string}`,

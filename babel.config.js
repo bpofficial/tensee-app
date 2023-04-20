@@ -16,6 +16,7 @@ module.exports = function (api) {
                         "@hooks": "./src/hooks",
                         "@screens": "./src/screens",
                         "@navigation": "./src/navigation",
+                        config: "./src/config.ts",
                     },
                 },
             ],

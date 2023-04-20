@@ -1,5 +1,5 @@
 import { captureError, startChildSpan, withSpan } from "@common";
-import { Config } from "src/config";
+import { Config } from "config";
 import { getSecureItem, setSecureItem } from "../../utils/secureStorage";
 import { createAppState, tracedFetch, withNetworkActivity } from "../utils";
 import { RefreshStatus } from "./types";

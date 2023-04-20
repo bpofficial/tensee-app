@@ -1,7 +1,7 @@
 import { tracedFetch } from "@api";
 import { startChildSpan, withSpan } from "@common";
+import { Config } from "config";
 import { Credentials, UserInfo } from "react-native-auth0";
-import { Config } from "src/config";
 import { auth0 } from "./auth0";
 import { IntermediateUserInfo } from "./types";
 

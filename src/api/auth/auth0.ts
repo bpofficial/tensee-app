@@ -1,4 +1,4 @@
-import { Config } from "@common";
+import { Config } from "config";
 import Auth0 from "react-native-auth0";
 
 export const auth0 = new Auth0({

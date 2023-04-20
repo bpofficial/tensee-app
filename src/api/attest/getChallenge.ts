@@ -1,6 +1,6 @@
-import { tracedFetch } from "@api";
 import { withSpan } from "@common";
 import { Span } from "@sentry/types";
+import { tracedFetch } from "../utils/fetch";
 
 export async function getChallenge(
     device: string,

@@ -18,6 +18,7 @@
       "@screens": ["./src/screens"],
       "@screens/*": ["./src/screens/*"],
       "@navigation": ["./src/navigation"],
+      "config": ["./src/config.ts"]
     }
   }
 }

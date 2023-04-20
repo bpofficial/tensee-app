@@ -1,7 +1,7 @@
 import { Logger } from "@common";
 import { useNavigation } from "@react-navigation/native";
+import { Config } from "config";
 import { useEffect } from "react";
-import { Config } from "src/config";
 import { useAppState } from "./context/AppStateContext";
 import { useAuth } from "./context/AuthContext";
 import { useCredentialActions } from "./context/CredentialContext";

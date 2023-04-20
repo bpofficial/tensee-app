@@ -1,6 +1,6 @@
 import { withSpan } from "@common";
+import { Config } from "config";
 import { Credentials } from "react-native-auth0";
-import { Config } from "src/config";
 import { auth0 } from "./auth0";
 
 export const exchangeAppleAuthorizationCode = async (

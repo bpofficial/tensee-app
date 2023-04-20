@@ -1,7 +1,7 @@
 import { API, RefreshStatus } from "@api";
-import { api } from "@api/constants";
-import { Config, withSpan } from "@common";
+import { withSpan } from "@common";
 import { getSecureItem, setSecureItem } from "@utils";
+import { Config } from "config";
 import React, {
     PropsWithChildren,
     createContext,
@@ -10,7 +10,7 @@ import React, {
 } from "react";
 import { InteractionManager } from "react-native";
 import { Credentials } from "react-native-auth0";
-import { useBoolean } from "./useBoolean";
+import { useBoolean } from "../useBoolean";
 
 interface ICredentialContext {
     accessToken: string | null;
@@ -69,13 +69,13 @@ export const CredentialProvider = ({ children }: PropsWithChildren) => {
                         setAccessToken(credentials.accessToken);
                         promises.push(
                             setSecureItem(
-                                api.secureStorageKey + "_accessToken",
+                                Config.auth0.secureStorageKey + "_accessToken",
                                 credentials.accessToken
                             )
                         );
                         promises.push(
                             setSecureItem(
-                                api.secureStorageKey + "_atExpiresAt",
+                                Config.auth0.secureStorageKey + "_atExpiresAt",
                                 accessTokenExpiry
                             )
                         );
@@ -83,18 +83,18 @@ export const CredentialProvider = ({ children }: PropsWithChildren) => {
 
                     if (credentials.refreshToken) {
                         const refreshTokenExpiry = (
-                            now + api.refreshTokenLifetime
+                            now + Config.auth0.refreshTokenLifetime
                         ).toString();
 
                         promises.push(
                             setSecureItem(
-                                api.secureStorageKey + "_refreshToken",
+                                Config.auth0.secureStorageKey + "_refreshToken",
                                 credentials.refreshToken
                             )
                         );
                         promises.push(
                             setSecureItem(
-                                api.secureStorageKey + "_rtExpiresAt",
+                                Config.auth0.secureStorageKey + "_rtExpiresAt",
                                 refreshTokenExpiry
                             )
                         );
@@ -117,10 +117,22 @@ export const CredentialProvider = ({ children }: PropsWithChildren) => {
             async () => {
                 setAccessToken(null);
                 await Promise.all([
-                    setSecureItem(api.secureStorageKey + "_accessToken", null),
-                    setSecureItem(api.secureStorageKey + "_refreshToken", null),
-                    setSecureItem(api.secureStorageKey + "_atExpiresAt", null),
-                    setSecureItem(api.secureStorageKey + "_rtExpiresAt", null),
+                    setSecureItem(
+                        Config.auth0.secureStorageKey + "_accessToken",
+                        null
+                    ),
+                    setSecureItem(
+                        Config.auth0.secureStorageKey + "_refreshToken",
+                        null
+                    ),
+                    setSecureItem(
+                        Config.auth0.secureStorageKey + "_atExpiresAt",
+                        null
+                    ),
+                    setSecureItem(
+                        Config.auth0.secureStorageKey + "_rtExpiresAt",
+                        null
+                    ),
                 ]);
             }
         ).catch();
@@ -128,8 +140,9 @@ export const CredentialProvider = ({ children }: PropsWithChildren) => {
 
     const isTokenExpired = async (t: "refresh" | "access") => {
         const keyPart = t === "access" ? "at" : "rt";
-        const tokenKey = api.secureStorageKey + `_${t}Token`;
-        const expiryKey = api.secureStorageKey + `_${keyPart}ExpiresAt`;
+        const tokenKey = Config.auth0.secureStorageKey + `_${t}Token`;
+        const expiryKey =
+            Config.auth0.secureStorageKey + `_${keyPart}ExpiresAt`;
 
         const token = await getSecureItem(tokenKey);
         const expiry = await getSecureItem(expiryKey);
@@ -160,7 +173,7 @@ export const CredentialProvider = ({ children }: PropsWithChildren) => {
                 },
                 async () => {
                     const newAccessToken = await getSecureItem(
-                        api.secureStorageKey + "_accessToken"
+                        Config.auth0.secureStorageKey + "_accessToken"
                     );
                     if (newAccessToken?.length) {
                         setAccessToken(newAccessToken);

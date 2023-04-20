@@ -9,9 +9,9 @@ import React, {
     useEffect,
     useState,
 } from "react";
+import { useBoolean } from "../useBoolean";
 import { useAuth } from "./AuthContext";
 import { useCredentialActions } from "./CredentialContext";
-import { useBoolean } from "./useBoolean";
 
 interface IAttestationContext {
     attestStatus: AttestationStatus | null;
