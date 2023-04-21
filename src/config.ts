@@ -11,9 +11,13 @@ export const Config = {
         secureStorageKey: "auth0_credentials",
     },
     facebook: {
-        clientId: "938879340574098",
+        clientId: Constants.expoConfig?.extra!.FACEBOOK_CLIENT_ID,
+    },
+    google: {
+        androidClientId: Constants.expoConfig?.extra!.GOOGLE_CLIENT_ID_ANDROID,
+        iosClientId: Constants.expoConfig?.extra!.GOOGLE_CLIENT_ID_IOS,
     },
     api: {
-        apiUrl: "http://192.168.1.8:4000/local",
+        apiUrl: Constants.expoConfig?.extra!.API_URL,
     },
 };

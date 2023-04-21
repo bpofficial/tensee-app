@@ -1,5 +1,6 @@
 import { captureError } from "@common";
 import { useColor } from "@hooks";
+import { Config } from "config";
 import * as Google from "expo-auth-session/providers/google";
 import * as WebBrowser from "expo-web-browser";
 import React, { useEffect } from "react";
@@ -15,10 +16,8 @@ export const SignInWithGoogle = ({ disabled = false }) => {
     const onLoginComplete = useOnLoginComplete();
 
     const [request, response, promptAsync] = Google.useAuthRequest({
-        androidClientId:
-            "635247457778-81rqnkohtmjilqep4jd61e9dq8h01pk6.apps.googleusercontent.com",
-        iosClientId:
-            "635247457778-6hk52aj9s8vv1u880n7b481oj4nkbke9.apps.googleusercontent.com",
+        androidClientId: Config.google.androidClientId,
+        iosClientId: Config.google.iosClientId,
     });
 
     useEffect(() => {
